@@ -20,7 +20,7 @@ package com.alibaba.cloud.ai.example.prompt.controller;
 import java.util.HashMap;
 import java.util.Map;
 
-import reactor.core.publisher.Flux;
+import com.alibaba.cloud.ai.example.prompt.entity.Completion;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/prompt/ai")
+@RequestMapping("/example/ai")
 public class StuffController {
 
 	private final ChatClient chatClient;
@@ -49,15 +49,10 @@ public class StuffController {
 		this.chatClient = builder.build();
 	}
 
-	/**
-	 * 演示使用特定的 prompt 上下文信息以增强大模型的回答。
-	 */
 	@GetMapping(value = "/stuff")
-	public Flux<String> completion(
-			@RequestParam(
-					value = "message",
-					required = false,
-					defaultValue = "Which athletes won the mixed doubles gold medal in curling at the 2022 Winter Olympics?'") String message,
+	public Completion completion(
+			@RequestParam(value = "message",
+			defaultValue = "Which athletes won the mixed doubles gold medal in curling at the 2022 Winter Olympics?'") String message,
 			@RequestParam(value = "stuffit", defaultValue = "false") boolean stuffit
 	) {
 
@@ -65,8 +60,6 @@ public class StuffController {
 
 		Map<String, Object> map = new HashMap<>();
 		map.put("question", message);
-
-		// 是否填充 prompt 上下文，以增强大模型回答。
 		if (stuffit) {
 			map.put("context", docsToStuffResource);
 		}
@@ -74,8 +67,11 @@ public class StuffController {
 			map.put("context", "");
 		}
 
-		return chatClient.prompt(promptTemplate.create(map))
-				.stream().content();
+		return new Completion(
+				chatClient.prompt(promptTemplate.create(map))
+						.call()
+						.content()
+		);
 	}
 
 }

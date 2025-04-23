@@ -17,14 +17,15 @@
 
 package com.alibaba.example.chatmemory.controller;
 
-import jakarta.servlet.http.HttpServletResponse;
+import com.alibaba.cloud.ai.memory.mysql.MysqlChatMemory;
+import com.alibaba.cloud.ai.memory.redis.RedisChatMemory;
 import reactor.core.publisher.Flux;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,24 +45,11 @@ public class ChatMemoryController {
 
 	private final ChatClient chatClient;
 
-	private final MessageChatMemoryAdvisor jdbcChatMemory;
+	public ChatMemoryController(ChatModel chatModel) {
 
-	private final MessageChatMemoryAdvisor redisChatMemory;
-
-	public ChatMemoryController(
-			ChatModel chatModel,
-			@Qualifier("jdbcMessageChatMemoryAdvisor") MessageChatMemoryAdvisor jdbcChatMemory,
-			@Qualifier("redisMessageChatMemoryAdvisor") MessageChatMemoryAdvisor redisChatMemory
-	) {
-
-		this.jdbcChatMemory = jdbcChatMemory;
-		this.redisChatMemory = redisChatMemory;
 		this.chatClient = ChatClient.builder(chatModel).build();
 	}
 
-	/**
-	 * Spring AI 提供的基于内存的 Chat Memory 实现
-	 */
 	@GetMapping("/in-memory")
 	public Flux<String> memory(
 			@RequestParam("prompt") String prompt,
@@ -73,7 +61,7 @@ public class ChatMemoryController {
 
 		return chatClient.prompt(prompt).advisors(
 				new MessageChatMemoryAdvisor(
-						new InMemoryChatMemory())
+				new InMemoryChatMemory())
 		).advisors(
 				a -> a
 						.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
@@ -81,11 +69,8 @@ public class ChatMemoryController {
 		).stream().content();
 	}
 
-	/**
-	 * SQLite Chat Memory 实现
-	 */
-	@GetMapping("/sqlite")
-	public Flux<String> sqlite(
+	@GetMapping("/mysql")
+	public Flux<String> mysql(
 			@RequestParam("prompt") String prompt,
 			@RequestParam("chatId") String chatId,
 			HttpServletResponse response
@@ -93,18 +78,17 @@ public class ChatMemoryController {
 
 		response.setCharacterEncoding("UTF-8");
 
-		return chatClient.prompt(prompt)
-				.advisors(jdbcChatMemory)
-				.advisors(
-						a -> a
-								.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
-								.param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100)
-				).stream().content();
+		return chatClient.prompt(prompt).advisors(
+				new MessageChatMemoryAdvisor(new MysqlChatMemory(
+						// 填入 mysql 连接参数
+				))
+		).advisors(
+				a -> a
+						.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+						.param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100)
+		).stream().content();
 	}
 
-	/**
-	 * Redis Chat Memory 实现
-	 */
 	@GetMapping("/redis")
 	public Flux<String> redis(
 			@RequestParam("prompt") String prompt,
@@ -115,7 +99,11 @@ public class ChatMemoryController {
 		response.setCharacterEncoding("UTF-8");
 
 		return chatClient.prompt(prompt).advisors(
-				redisChatMemory
+				new MessageChatMemoryAdvisor(new RedisChatMemory(
+						"127.0.0.1",
+						6379,
+						"springaialibaba123456"
+				))
 		).advisors(
 				a -> a
 						.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)

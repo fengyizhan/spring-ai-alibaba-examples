@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,32 +41,30 @@ import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvis
 @Service
 public class SAAChatService {
 
-	private final ChatClient chatClient;
+	private final ChatClient defaultChatClient;
 
 	private final PromptTemplate deepThinkPromptTemplate;
 
 	public SAAChatService(
-			SimpleLoggerAdvisor simpleLoggerAdvisor,
-			MessageChatMemoryAdvisor messageChatMemoryAdvisor,
-			@Qualifier("dashscopeChatModel") ChatModel chatModel,
-			@Qualifier("systemPromptTemplate") PromptTemplate systemPromptTemplate,
-			@Qualifier("deepThinkPromptTemplate") PromptTemplate deepThinkPromptTemplate
+			ChatModel chatModel,
+			@Qualifier("deepThinkPromptTemplate") PromptTemplate deepThinkPromptTemplate,
+			@Qualifier("systemPromptTemplate") PromptTemplate systemPromptTemplate
 	) {
 
-		this.chatClient = ChatClient.builder(chatModel)
+		this.defaultChatClient = ChatClient.builder(chatModel)
 				.defaultSystem(
 					systemPromptTemplate.getTemplate()
 				).defaultAdvisors(
-						simpleLoggerAdvisor,
-						messageChatMemoryAdvisor
+						new MessageChatMemoryAdvisor(new InMemoryChatMemory()),
+						new SimpleLoggerAdvisor()
 				).build();
 
 		this.deepThinkPromptTemplate = deepThinkPromptTemplate;
 	}
 
-	public Flux<String> chat(String chatId, String model, String prompt) {
+	public Flux<String> chat(String chatId, String model, String chatPrompt) {
 
-		return chatClient.prompt()
+		return defaultChatClient.prompt()
 				.options(DashScopeChatOptions.builder()
 						.withModel(model)
 						.withTemperature(0.8)
@@ -73,7 +72,7 @@ public class SAAChatService {
 								.type(DashScopeResponseFormat.Type.TEXT)
 								.build()
 						).build()
-				).user(prompt)
+				).user(chatPrompt)
 				.advisors(memoryAdvisor -> memoryAdvisor
 						.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
 						.param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100)
@@ -81,9 +80,9 @@ public class SAAChatService {
 				.content();
 	}
 
-	public Flux<String> deepThinkingChat(String chatId, String model, String prompt) {
+	public Flux<String> deepThinkingChat(String chatId, String model, String chatPrompt) {
 
-		return chatClient.prompt()
+		return defaultChatClient.prompt()
 				.options(DashScopeChatOptions.builder()
 						.withModel(model)
 						.withTemperature(0.8)
@@ -92,7 +91,7 @@ public class SAAChatService {
 								.build()
 						).build()
 				).system(deepThinkPromptTemplate.getTemplate())
-				.user(prompt)
+				.user(chatPrompt)
 				.advisors(memoryAdvisor -> memoryAdvisor
 						.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
 						.param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100)

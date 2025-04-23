@@ -1,20 +1,113 @@
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+# enabled debug log out.
+logging:
+  level:
+    com:
+      alibaba:
+        dashscope:
+          api: debug
+    org:
+      apache:
+        http: debug
+      springframework:
+        ai: debug
+        web:
+          client:
+            RestTemplate: debug
+    root: debug
+    io:
+      modelcontextprotocol:
+        client: DEBUG
+        spec: DEBUG
+
+# 强制设置HTTP响应头
 spring:
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  mvc:
+    view:
+      prefix: /views/
+      suffix: .html
+  main:
+    allow-bean-definition-overriding: true
   application:
-    name: spring-ai-alibaba-rag-milvus-example
+    name: ai
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 16379
+      password: huadingyun
+      database: 0
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:13306/ai?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: huading123
+    type: com.alibaba.druid.pool.DruidDataSource
 
   ai:
+    #    ollama:
+    #      base-url: http://localhost:11434
+    #      # 聊天模型配置
+    #      chat:
+    #        model: deepseek-r1:14b
+    #        options:
+    #          temperature: 0.7
+    #      # 嵌入模型配置
+    #      embedding:
+    #base-url: http://localhost:11434
+    #          model: nomic-embed-text:latest
     dashscope:
-      api-key: ${AI_DASHSCOPE_API_KEY}
+      api-key: sk-1e89eafc794343dbbd1ccd07d1f5d338
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      chat:
+        options:
+          model: deepseek-r1-distill-qwen-32b
+      embedding:
+        api-key: sk-1e89eafc794343dbbd1ccd07d1f5d338
+        options:
+          model: text-embedding-v3
+          dimensions: 1024
 
+    # 向量存储器配置
     vectorstore:
       milvus:
         client:
           host: ${MILVUS_HOST:localhost} # default: localhost
           port: ${MILVUS_PORT:19530} # default: 19530
-          username: ${MILVUS_USERNAME:root} # default: root
-          password: ${MILVUS_PASSWORD:milvus} # default: milvus
-        databaseName: ${MILVUS_DATABASE_NAME:default} # default: default
+          username: ${MILVUS_USERNAME:huading} # default: root
+          password: ${MILVUS_PASSWORD:hdadmin} # default: milvus
+        databaseName: ${MILVUS_DATABASE_NAME:test} # default: default
         collectionName: ${MILVUS_COLLECTION_NAME:vector_store} # default: vector_store
-        embeddingDimension: 1536 # default: 1536
+        embeddingDimension: 1024 # default: 1536 大约2000字content限制
         indexType: IVF_FLAT # default: IVF_FLAT
         metricType: COSINE # default: COSINE
+        initialize-schema: true
+        auto-id: false
+
+mybatis-plus:
+  #  mapper-locations: classpath:/mapper/**/*.xml  # Mapper XML文件位置
+  type-aliases-package: com.alibaba.cloud.ai.example.rag.domain  # 类型别名包名，例如实体类的包名
+  global-config:
+    db-config:
+      db-type: mysql  # 数据库类型，用于生成SQL时进行优化等处理
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 开启SQL日志输出，方便调试
+
+
+
+milvus:
+  host: ${MILVUS_HOST:localhost} # default: localhost
+  port: ${MILVUS_PORT:19530} # default: 19530
+  username: ${MILVUS_USERNAME:huading} # default: root
+  password: ${MILVUS_PASSWORD:hdadmin} # default: milvus

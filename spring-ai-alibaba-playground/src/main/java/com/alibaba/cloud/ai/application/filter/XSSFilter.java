@@ -42,7 +42,7 @@ public class XSSFilter implements Filter {
 		// 设置 CPS 允许内联样式和跨域获取图片
 		httpResponse.setHeader(
 				"Content-Security-Policy",
-				"default-src 'self'; font-src 'self' data:; style-src 'self' 'unsafe-inline'; img-src 'self' https://mdn.alipayobjects.com blob: data:;");
+				"default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https://mdn.alipayobjects.com blob: data:;");
 		chain.doFilter(request, response);
 	}
 

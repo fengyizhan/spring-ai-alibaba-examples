@@ -1,39 +1,26 @@
-/*
- * Copyright 2025 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.alibaba.cloud.ai.example.rag.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.alibaba.cloud.ai.dashscope.api.DashScopeApi;
+import com.alibaba.cloud.ai.dashscope.embedding.DashScopeEmbeddingModel;
+import com.alibaba.cloud.ai.dashscope.embedding.DashScopeEmbeddingOptions;
 import jakarta.servlet.http.HttpServletResponse;
-import reactor.core.publisher.Flux;
-
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.document.Document;
+import org.springframework.ai.document.MetadataMode;
+import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
+import java.util.List;
 @RestController
 @RequestMapping("/ai")
 public class RagController {
@@ -42,7 +29,7 @@ public class RagController {
 
     private final ChatClient chatClient;
 
-    public RagController(VectorStore vectorStore, ChatClient chatClient) {
+    public RagController(@Qualifier("vectorStore2") VectorStore vectorStore, ChatClient chatClient) {
         this.vectorStore = vectorStore;
         this.chatClient = chatClient;
     }
@@ -60,7 +47,6 @@ public class RagController {
     ) {
 
         response.setCharacterEncoding("UTF-8");
-
         // 发起聊天请求并处理响应
         Flux<String> resp = chatClient.prompt()
                 .messages(historyMessage)
@@ -86,13 +72,17 @@ public class RagController {
      * 向量数据查询测试
      */
     @GetMapping("/select")
-    public List<Document> search() {
-
-        return vectorStore.similaritySearch(
-                SearchRequest.builder()
-                        .query("SpringAIAlibaba")
-                        .topK("SpringAIAlibaba".length()
-                        ).build());
+    public void search() {
+        var dashScopeApi = new DashScopeApi(System.getenv("DASHSCOPE_API_KEY"));
+        var embeddingModel = new DashScopeEmbeddingModel(dashScopeApi, MetadataMode.EMBED,
+                DashScopeEmbeddingOptions.builder()
+                        .withModel("text-embedding-v3")
+                        .build());
+        EmbeddingResponse embeddingResponse = embeddingModel
+                .embedForResponse(List.of("Hello World", "World is big and salvation is near"));
     }
+
+
+
 
 }

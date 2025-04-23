@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.List;
 
 import com.alibaba.cloud.ai.application.utils.FilesUtils;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.alibaba.cloud.ai.dashscope.chat.MessageFormat;
 import com.alibaba.cloud.ai.dashscope.image.DashScopeImageOptions;
@@ -39,14 +40,11 @@ import org.springframework.ai.image.ImageGeneration;
 import org.springframework.ai.image.ImageModel;
 import org.springframework.ai.image.ImagePrompt;
 import org.springframework.ai.model.Media;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.multipart.MultipartFile;
-
-import static com.alibaba.cloud.ai.dashscope.common.DashScopeApiConstants.MESSAGE_FORMAT;
 
 /**
  * @author yuluo
@@ -71,8 +69,8 @@ public class SAAImageService {
 	private final ChatClient daschScopeChatClient;
 
 	public SAAImageService(
-			@Qualifier("dashscopeChatModel") ChatModel chatModel,
-			@Qualifier("dashScopeImageModel") ImageModel imageModel
+			ImageModel imageModel,
+			ChatModel chatModel
 	) {
 
 		this.imageModel = imageModel;
@@ -83,7 +81,9 @@ public class SAAImageService {
 
 	public Flux<String> image2Text(String prompt, MultipartFile file) throws IOException {
 
-		String filePath = FilesUtils.saveTempFile(file, "/tmp/image/");
+		String filePath = System.getProperty("user.dir") + "/" + "tmp/image/" + file.getOriginalFilename();
+		FilesUtils.saveTempImage(file, filePath);
+
 		UserMessage message = new UserMessage(
 				prompt,
 				new Media(
@@ -91,7 +91,7 @@ public class SAAImageService {
 						new FileSystemResource(filePath)
 				)
 		);
-		message.getMetadata().put(MESSAGE_FORMAT, MessageFormat.IMAGE);
+		message.getMetadata().put(DashScopeChatModel.MESSAGE_FORMAT, MessageFormat.IMAGE);
 
 		List<ChatResponse> response = daschScopeChatClient.prompt(
 						new Prompt(
@@ -109,7 +109,7 @@ public class SAAImageService {
 		if (response != null) {
 			for (ChatResponse chatResponse : response) {
 				String outputContent = chatResponse.getResult().getOutput().getText();
-				result.append(outputContent);
+				result.append(outputContent).append("\n");
 			}
 		}
 

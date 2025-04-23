@@ -6,7 +6,7 @@ import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.alibaba.cloud.ai.model.RerankModel;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.rag.preretrieval.query.expansion.QueryExpander;
 import org.springframework.ai.rag.preretrieval.query.transformation.QueryTransformer;
@@ -32,16 +32,15 @@ public class WeSearchConfiguration {
 
 	@Bean
 	public QueryTransformer queryTransformer(
-			@Qualifier("dashscopeChatModel") ChatModel chatModel,
+			ChatClient.Builder chatClientBuilder,
 			@Qualifier("transformerPromptTemplate") PromptTemplate transformerPromptTemplate
 	) {
 
-		ChatClient chatClient = ChatClient.builder(chatModel)
-				.defaultOptions(
-						DashScopeChatOptions.builder()
-								.withModel("qwen-plus")
-								.build()
-				).build();
+		ChatClient chatClient = chatClientBuilder.defaultOptions(
+				DashScopeChatOptions.builder()
+						.withModel("qwen-plus")
+						.build()
+		).build();
 
 		return RewriteQueryTransformer.builder()
 				.chatClientBuilder(chatClient.mutate())
@@ -52,20 +51,25 @@ public class WeSearchConfiguration {
 
 	@Bean
 	public QueryExpander queryExpander(
-			@Qualifier("dashscopeChatModel") ChatModel chatModel
+			ChatClient.Builder chatClientBuilder
 	) {
 
-		ChatClient chatClient = ChatClient.builder(chatModel)
-				.defaultOptions(
-						DashScopeChatOptions.builder()
-								.withModel("qwen-plus")
-								.build()
-				).build();
+		ChatClient chatClient = chatClientBuilder.defaultOptions(
+				DashScopeChatOptions.builder()
+						.withModel("qwen-plus")
+						.build()
+		).build();
 
 		return MultiQueryExpander.builder()
 				.chatClientBuilder(chatClient.mutate())
 				.numberOfQueries(2)
 				.build();
+	}
+
+	@Bean
+	public SimpleLoggerAdvisor simpleLoggerAdvisor() {
+
+		return new SimpleLoggerAdvisor();
 	}
 
 }

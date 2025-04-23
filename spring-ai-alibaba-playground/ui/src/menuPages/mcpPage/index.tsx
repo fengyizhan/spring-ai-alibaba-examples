@@ -1,8 +1,8 @@
 import React from "react";
-import McpLandingView from "./McpLandingView";
+import BasePage from "../components/BasePage";
 
 const McpPage: React.FC = () => {
-  return <McpLandingView />;
+  return <BasePage title="MCP"></BasePage>;
 };
 
 export default McpPage;

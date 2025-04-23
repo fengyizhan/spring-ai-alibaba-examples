@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AI</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script defer>
+        let eventSource;
+
+        function appendMessage(position, msg, cls) {
+            // msg=msg.replace(/\n/g, "<br>"); // 换行需要转换为前端识别的换行符
+            var targetBox=$('#'+position);
+            targetBox.append(`<div class="${cls}">${msg}</div>`);
+            targetBox.scrollTop(targetBox.scrollHeight);
+        }
+
+        function sendMessage() {
+            const message = $('#messageInput').val().trim();
+            if (!message) return;
+
+            // 关闭之前的连接
+            if (eventSource) eventSource.close();
+
+            appendMessage('chatBox',message, 'user-msg');
+            $('#messageInput').val('');
+
+            // 建立SSE连接
+            eventSource = new EventSource(`http://127.0.0.1:8080/vector/tableSql?message=${encodeURIComponent(message)}`);
+
+            eventSource.onmessage = (e) => {
+                const lastDiv = $('#chatBox .ai-msg:last');
+                var eventObj=JSON.parse(e.data);
+                var eventText=eventObj.text;
+                var thinkText=eventObj.metadata.reasoningContent;
+                var setClass='ai-msg';
+                var contentStr='';
+                var targetBox='chatBox';
+                if(thinkText && thinkText.length>0)
+                {//思考阶段
+                    setClass='think-msg';
+                    contentStr=thinkText;
+                    targetBox='thinkBox';
+                }
+                if(eventText && eventText.length>0)
+                {//回答阶段
+                    setClass='ai-msg';
+                    contentStr=eventText;
+                    targetBox='chatBox';
+                }
+
+                if (lastDiv.length === 0) {
+                    appendMessage(targetBox,contentStr, setClass);
+                } else {
+                    lastDiv.html(lastDiv.html() + contentStr);
+                }
+            };
+
+            eventSource.onerror = (e) => {
+                eventSource.close();
+            };
+        }
+    </script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0; /* 去除默认边距 */
+        }
+        #chatBox
+        {
+            white-space: pre-wrap;
+            border:1px solid darkslategray;
+            width: 95%;
+            overflow: scroll;
+            height: 90%;
+
+            overflow-y: auto;
+            padding: 10px;
+        }
+        #messageInput
+        {
+            width:95%;
+            border: 1px solid darkslategray;
+        }
+        .chat_but
+        {
+            background-color: lightskyblue;
+            color:darkslategray;
+        }
+        #thinkBox
+        {
+            white-space: pre-wrap;
+            border:1px solid darkslategray;
+            width: 95%;
+            overflow: scroll;
+            height: 300px;
+
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .user-msg { white-space: pre-wrap;color: blue; margin: 5px 0; }
+        .ai-msg { white-space: pre-wrap;color: green; margin: 5px 0; }
+        .think-msg { white-space: nowrap;color: sandybrown; margin: 5px 0;display: inline-block;}
+    </style>
+</head>
+<body>
+<div id="thinkBox"></div>
+<div id="chatBox"></div>
+<textarea id="messageInput">商品表结构？</textarea>
+<button onclick="sendMessage()" class="chat_but">发送</button>
+<script>
+    $(function ()
+    {
+        // 回车发送
+        //$('#messageInput').keypress(e => e.which === 13 && sendMessage());
+    });
+
+</script>
+</body>
+</html>

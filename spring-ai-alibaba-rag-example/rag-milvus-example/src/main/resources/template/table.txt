@@ -1,0 +1,43 @@
+-- 商品表 (存储商品信息)
+CREATE TABLE `product` (
+  `product_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '商品ID',
+  `product_name` VARCHAR(200) NOT NULL COMMENT '商品名称',
+  `description` TEXT COMMENT '商品描述',
+  `price` DECIMAL(10,2) NOT NULL COMMENT '商品价格',
+  `stock` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '库存数量',
+  `status` ENUM('on_sale', 'off_sale') NOT NULL DEFAULT 'on_sale' COMMENT '商品状态（on_sale: 在售, off_sale: 下架）',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品表';
+
+######
+
+-- 订单表 (存储订单信息)
+CREATE TABLE `order` (
+  `order_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '订单ID',
+  `user_id` BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
+  `order_status` ENUM('pending_payment', 'paid', 'shipped', 'completed', 'canceled') NOT NULL DEFAULT 'pending_payment' COMMENT '订单状态',
+  `total_amount` DECIMAL(10,2) NOT NULL COMMENT '订单总金额',
+  `payment_status` ENUM('unpaid', 'paid', 'refunding', 'refunded') NOT NULL DEFAULT 'unpaid' COMMENT '支付状态',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`order_id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='订单表';
+
+######
+-- 订单详情表（订单和商品关联表）
+CREATE TABLE `order_item` (
+  `order_item_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '订单商品ID',
+  `order_id` BIGINT UNSIGNED NOT NULL COMMENT '订单ID',
+  `product_id` BIGINT UNSIGNED NOT NULL COMMENT '商品ID',
+  `quantity` INT UNSIGNED NOT NULL DEFAULT 1 COMMENT '商品数量',
+  `price` DECIMAL(10,2) NOT NULL COMMENT '商品单价',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`order_item_id`),
+  KEY `idx_order_id` (`order_id`),
+  KEY `idx_product_id` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='订单商品关联表';

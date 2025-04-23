@@ -46,6 +46,11 @@
             <artifactId>spring-ai-alibaba-starter</artifactId>
             <version>${spring-ai-alibaba.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-starter</artifactId>
+            <version>${spring-ai-alibaba.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -55,6 +60,53 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-milvus-store-spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>group.springframework.ai</groupId>
+            <artifactId>spring-ai-dashscope</artifactId>
+            <version>1.1.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-context-support</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>json-path</artifactId>
+                    <groupId>io.rest-assured</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jsonschema-generator</artifactId>
+                    <groupId>com.github.victools</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jsonschema-module-jackson</artifactId>
+                    <groupId>com.github.victools</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-ai-core</artifactId>
+                    <groupId>group.springframework.ai</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-ai-retry</artifactId>
+                    <groupId>group.springframework.ai</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-boot</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- HanLP中文分词 -->
+        <dependency>
+            <groupId>com.hankcs</groupId>
+            <artifactId>hanlp</artifactId>
+            <version>portable-1.8.6</version>
         </dependency>
     </dependencies>
 

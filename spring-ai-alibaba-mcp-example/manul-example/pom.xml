@@ -39,7 +39,6 @@
 		<module>filesystem</module>
 		<module>sqlite/chatbot</module>
 		<module>sqlite/simple</module>
-		<module>github</module>
 	</modules>
 
 	<build>

@@ -42,4 +42,4 @@ logs/
 *.jpg
 
 # ignore db files
-/src/main/resources/db/saa.db
+/src/main/resources/db/user.db

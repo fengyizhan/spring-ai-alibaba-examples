@@ -17,16 +17,14 @@
 
 package com.alibaba.cloud.ai.application.controller;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 import com.alibaba.cloud.ai.application.annotation.UserIp;
 import com.alibaba.cloud.ai.application.entity.result.Result;
 import com.alibaba.cloud.ai.application.service.SAAAudioService;
+import com.alibaba.cloud.ai.application.utils.ValidUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import reactor.core.publisher.Flux;
 
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,15 +54,22 @@ public class SAAAudioController {
 	@UserIp
 	@PostMapping("/audio2text")
 	@Operation(summary = "DashScope Audio Transcription")
-	public Result<String> audioToText(
-			@Validated @RequestParam("audio") MultipartFile audio
-	) throws IOException {
+	public Flux<Result<String>> audioToText(
+			@RequestParam("audio") MultipartFile audio
+	) {
 
 		if (audio.isEmpty()) {
-			return Result.failed("No audio file provided");
+			return Flux.just(Result.failed("No audio file provided"));
 		}
 
-		return Result.success(audioService.audio2text(audio));
+		Flux<Result<String>> res;
+		try {
+			res = audioService.audio2text(audio).map(Result::success);
+		} catch (Exception e) {
+			return Flux.just(Result.failed("Failed to transcribe audio: " + e.getMessage()));
+		}
+
+		return res;
 	}
 
 	/**
@@ -74,17 +79,21 @@ public class SAAAudioController {
 	@GetMapping("/text2audio")
 	@Operation(summary = "DashScope Speech Synthesis")
 	public Result<byte[]> textToAudio(
-			@Validated @RequestParam("prompt") String prompt
+			@RequestParam("prompt") String prompt
 	) {
+
+		if (!ValidUtils.isValidate(prompt)) {
+			return Result.failed("No chat prompt provided");
+		}
 
 		byte[] audioData = audioService.text2audio(prompt);
 
 		// test to verify that the audio data is empty
-		try (FileOutputStream fos = new FileOutputStream("tmp/audio/test-audio.wav")) {
-			fos.write(audioData);
-		} catch (IOException e) {
-			return Result.failed("Test save audio file: " + e.getMessage());
-		}
+		// try (FileOutputStream fos = new FileOutputStream("tmp/audio/test-audio.wav")) {
+		// 	fos.write(audioData);
+		// } catch (IOException e) {
+		// 	return Result.failed("Test save audio file: " + e.getMessage());
+		// }
 
 		return Result.success(audioData);
 	}

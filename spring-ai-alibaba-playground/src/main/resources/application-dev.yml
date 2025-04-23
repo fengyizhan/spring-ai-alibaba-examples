@@ -17,47 +17,12 @@
 
 spring:
   ai:
-
-    # 向量数据库配置
-    vectorstore:
-      analytic:
-        enabled: false
-        dbInstanceId: gp-bp1238pvyz0g78u2m
-        regionId: cn-hangzhou
-        managerAccount: ${ADB_MANAGER_ACCOUNT}
-        managerAccountPassword: ${ADB_MANAGER_ACCOUNT_PASSWORD}
-        namespace: saa
-        namespacePassword: saa@2025
-        collectName: saa
-        access-key-id: ${ADB_ACCESS_KEY_ID}
-        access-key-secret: ${ADB_ACCESS_KEY_SECRET}
-
     dashscope:
       api-key: ${AI_DASHSCOPE_API_KEY}
-    # 使用自定义增强的 mcp server config 替换
-    # mcp:
-    #   client:
-    #     stdio:
-    #       servers-configuration: classpath:/mcp-servers-config.json
-
-    # 需要配置相关 tools 的信息
-    alibaba:
-     playground:
-       tool-calling:
-         baidu:
-           translate:
-             ak: ${BAIDU_TRANSLATE_APP_ID}
-             sk: ${BAIDU_TRANSLATE_SECRET_KEY}
-           map:
-             ak: ${BAIDU_MAP_API_KEY}
-
-    # openai api 接入通义模型
-    openai:
-      base-url: https://dashscope.aliyuncs.com/compatible-mode
-      api-key: ${AI_DASHSCOPE_API_KEY}
-      chat:
-        options:
-          model: qwen-max
+    mcp:
+      client:
+        stdio:
+          servers-configuration: classpath:/mcp-servers-config.json
 
     # 注意：观测数据可能存在敏感信息！
     chat:
@@ -73,7 +38,7 @@ spring:
         include-error-logging: true
 
   datasource:
-    url: jdbc:sqlite:src/main/resources/db/saa.db
+    url: jdbc:sqlite:src/main/resources/db/user.db
     driver-class-name: org.sqlite.JDBC
 
   jpa:
@@ -96,7 +61,6 @@ logging:
   level:
     org.springframework.ai: debug
     com.alibaba.dashscope.api: debug
-    com.alibaba.cloud.ai.application: debug
 
 # 部署时不配置，使用默认配置
 management:
@@ -111,5 +75,5 @@ management:
       show-details: always
   tracing:
     sampling:
-      # trace 采样信息，记录每个请求
-      probability: 1.0
+        # trace 采样信息，记录每个请求
+        probability: 1.0

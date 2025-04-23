@@ -1,16 +1,8 @@
 import React from "react";
-import { useParams } from "react-router-dom";
-import RagConversationView from "./RagConversationView";
-import RagLandingView from "./RagLandingView";
+import BasePage from "../components/BasePage";
 
 const RagPage: React.FC = () => {
-  const { conversationId } = useParams<{ conversationId?: string }>();
-
-  if (conversationId) {
-    return <RagConversationView conversationId={conversationId} />;
-  } else {
-    return <RagLandingView />;
-  }
+  return <BasePage title="RAG"></BasePage>;
 };
 
 export default RagPage;
