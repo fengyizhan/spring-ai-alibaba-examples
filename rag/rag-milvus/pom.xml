@@ -47,6 +47,10 @@
             <version>${spring-ai-alibaba.version}</version>
         </dependency>
         <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.alibaba.cloud.ai</groupId>
             <artifactId>spring-ai-alibaba-starter</artifactId>
             <version>${spring-ai-alibaba.version}</version>
