@@ -21,14 +21,11 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.alibaba.cloud.ai</groupId>
-	<artifactId>spring-ai-alibaba-examples</artifactId>
+	<groupId>com.hd.cloud.ai</groupId>
+	<artifactId>hd-ai</artifactId>
 	<version>${revision}</version>
 	<packaging>pom</packaging>
-
-	<description>Spring AI Alibaba Examples</description>
-	<name>Spring AI Alibaba Examples</name>
-	<url>https://github.com/springaialibaba/spring-ai-alibaba-examples</url>
+	<description>Hd AI</description>
 
 	<properties>
 		<!-- Project revision -->
@@ -56,7 +53,8 @@
 	</properties>
 
 	<modules>
-		<module>spring-ai-alibaba-rag-example</module>
+		<module>rag</module>
+		<module>mcp</module>
 	</modules>
 
 	<dependencyManagement>

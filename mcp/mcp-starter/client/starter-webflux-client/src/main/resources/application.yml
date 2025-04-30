@@ -1,0 +1,44 @@
+server:
+  port: 9999
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: mcp-client
+  main:
+    web-application-type: none
+  ai:
+    dashscope:
+      api-key: sk-1e89eafc794343dbbd1ccd07d1f5d338
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      chat:
+        options:
+          model: qwen-max-latest
+
+    mcp:
+      client:
+        type: ASYNC
+        toolcallback:
+          enabled: true
+        request-timeout: 60s
+        sse:
+          connections:
+            server1:
+              url: http://localhost:8899
+  mandatory-file-encoding: UTF-8
+
+
+# 调试日志
+logging:
+  level:
+    org:
+      springframework:
+        ai: DEBUG
+    io:
+      modelcontextprotocol:
+        client: DEBUG
+        spec: DEBUG
