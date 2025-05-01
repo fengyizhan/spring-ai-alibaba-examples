@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @RestController
 @RequestMapping("/api/demand-doc")
@@ -16,16 +15,20 @@ public class DemandDocController {
     @Autowired
     private DemandDocService docService;
 
-    @PostMapping
+    @PostMapping("/save")
     public AjaxResult<DemandDocument> save(@RequestBody DemandDocument doc) {
         doc.setId(IdUtil.getSnowflakeNextIdStr());
         doc.setCreateDate(LocalDateTime.now());
         return AjaxResult.success(docService.save(doc));
     }
+    @PostMapping("delete")
+    public AjaxResult<DemandDocument> del(String id) {
+        return AjaxResult.success(docService.delDocument(id));
+    }
 
-    @GetMapping("/tree")
-    public AjaxResult<DemandDocument> getTree(@RequestParam String branchId,
-                          @RequestParam String tagId) {
-        return AjaxResult.success(docService.getDocumentTree(branchId, tagId));
+
+    @PostMapping("/tree")
+    public AjaxResult<DemandDocument> getTree(String pid,String projectId,String branchId, String tagId,String title,Integer currentPage,Integer pageSize) {
+        return AjaxResult.success(docService.getDocumentTree(pid,projectId,branchId,tagId,title,currentPage,pageSize));
     }
 }
