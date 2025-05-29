@@ -35,7 +35,8 @@ public class ChatConfiguration {
         DashScopeApi dashScopeApi = new DashScopeApi(System.getenv("DASHSCOPE_API_KEY"));
         DashScopeChatModel mcpChatModel = new DashScopeChatModel(dashScopeApi,
                 DashScopeChatOptions.builder()
-                        .withModel("qwen-plus-latest")
+                        .withModel("qwen-max-latest")
+                    //qwen-coder-plus-latest
                         .build());
         return mcpChatModel;
     }
@@ -57,7 +58,8 @@ public class ChatConfiguration {
         DashScopeApi dashScopeApi = new DashScopeApi(System.getenv("DASHSCOPE_API_KEY"));
         DashScopeChatModel chatModel = new DashScopeChatModel(dashScopeApi,
                 DashScopeChatOptions.builder()
-                        .withModel("deepseek-r1")
+                        .withModel("qwen-turbo-latest")
+                        //支持1M的上下文长度
 //                        .withEnableSearch(true)
                         //联网查询
                         .build());

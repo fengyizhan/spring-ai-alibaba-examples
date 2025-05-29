@@ -1,10 +1,9 @@
 package com.hd.ai.rag.controller.coding;
 
 import com.hd.ai.rag.common.AjaxResult;
+import com.hd.ai.rag.entity.Branch;
 import com.hd.ai.rag.entity.CodingRuleDocument;
-import com.hd.ai.rag.entity.Tag;
 import com.hd.ai.rag.service.CodingRuleDocService;
-import com.hd.ai.rag.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,5 +24,10 @@ public class CodingRuleDocController {
     @PostMapping("/delete")
     public AjaxResult<Boolean> delete(String id) {
         return AjaxResult.success(codingRuleDocService.del(id));
+    }
+
+    @PostMapping("/list")
+    public AjaxResult<CodingRuleDocument> list(String projectId,String title, Integer currentPage, Integer pageSize) {
+        return AjaxResult.success(codingRuleDocService.list(projectId,title,currentPage,pageSize));
     }
 }

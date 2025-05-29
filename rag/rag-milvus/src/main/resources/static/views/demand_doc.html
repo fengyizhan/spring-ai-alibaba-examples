@@ -1,0 +1,917 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>需求文档列表</title>
+  <!-- CSS依赖 -->
+  <link href="/css/jquery.treegrid.css" rel="stylesheet">
+
+  <!-- JS依赖 -->
+  <script src="/js/jquery-3.7.0.min.js"></script>
+  <script src="/js/jquery.treegrid.min.js"></script>
+
+  <style>
+    /* 基础表格容器 */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 核心表格样式 */
+    .vue-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      --primary-color: #409eff; /* Vue主题色可自定义 */
+      --hover-color: #f5f7fa;
+    }
+
+    /* 表头样式 */
+    .vue-table__header {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .vue-table__header th {
+      padding: 12px 16px;
+      font-weight: 600;
+      text-align: left;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* 表格主体 */
+    .vue-table__body td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #ebeef5;
+      transition: background-color 0.25s;
+    }
+
+    /* 斑马纹效果 */
+    .vue-table--striped .vue-table__body tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+
+    /* 悬停效果 */
+    .vue-table--hover .vue-table__body tr:hover td {
+      background-color: var(--hover-color);
+    }
+
+    /* 紧凑模式 */
+    .vue-table--compact td,
+    .vue-table--compact th {
+      padding: 8px 12px;
+    }
+
+    /* 边框模式 */
+    .vue-table--bordered {
+      border: 1px solid #ebeef5;
+    }
+
+    .vue-table--bordered th,
+    .vue-table--bordered td {
+      border-right: 1px solid #ebeef5;
+    }
+    /* 基础按钮容器 */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid transparent;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    /* 禁用状态 */
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+      /* 默认主题色 */
+    :root {
+      --primary-color: #409eff;  /* Vue 主题蓝 */
+      --success-color: #67c23a;
+      --warning-color: #e6a23c;
+      --danger-color: #f56c6c;
+      --text-color: #606266;
+    }
+
+    /* 主按钮 */
+    .btn--primary {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    .btn--right {
+      float: right;
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    /* 悬浮效果 */
+    .btn--primary:hover:not(:disabled) {
+      background: #66b1ff;
+      border-color: #66b1ff;
+    }
+
+    /* 其他主题色 */
+    .btn--success { background: var(--success-color); color: white; }
+    .btn--warning { background: var(--warning-color); color: white; }
+    .btn--danger { background: var(--danger-color); color: white; }
+    .btn-delete {color:#f56c6c;}
+    .btn-add {color:#409eff;}
+
+    /* 容器样式 */
+    .query-container {
+      background: #fff;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
+    }
+
+    /* 表单组布局 */
+    .query-group {
+      display: flex;
+      width: 98%;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    /* 单个查询项 */
+    .query-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 240px;
+    }
+
+    /* 标签样式 */
+    label {
+      font-size: 14px;
+      color: #606266;
+      white-space: nowrap;
+    }
+
+    /* 基础输入框样式 */
+    .query-input, .query-select, .query-date {
+      padding: 8px 12px;
+      border: 1px solid #dcdfe6;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+      flex: 1;
+    }
+
+    /* 输入框交互效果 */
+    .query-input:focus, .query-select:focus {
+      border-color: #409eff;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(64,158,255,0.2);
+    }
+
+    /* 日期范围布局 */
+    .date-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .separator {
+      color: #909399;
+      padding: 0 4px;
+    }
+
+    /* 下拉选择箭头自定义 */
+    .query-select {
+      -webkit-appearance: none;
+      background: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24"><path fill="%23666" d="M7 10l5 5 5-5z"/></svg>')
+      no-repeat right 8px center/12px;
+      padding-right: 32px;
+    }
+
+    /* 按钮组布局 */
+    .action-group {
+      display: flex;
+      width: 100%;
+      gap: 12px;
+      border-top: 1px solid #ebeef5;
+      padding-top: 16px;
+    }
+
+
+    .treegrid-table {
+      width: 98%;
+      margin: 10px auto;
+      border: 1px solid #e0e0e0;
+    }
+    .treegrid-table td, .treegrid-table th {
+      padding: 12px 15px;
+      border: 1px solid #eee;
+    }
+    .treegrid-expander {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-right: 5px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23666"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>');
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .treegrid-expander-expanded {
+      transform: rotate(90deg);
+    }
+
+    .treegrid-indent { width: 1px; height: 1px; display: inline-block; }
+    .treegrid-expander {
+      cursor: pointer;
+      padding-right: 1px;
+    }
+    .loading:after {
+      content: " 加载中...";
+      color: #999;
+      font-style: italic;
+    }
+    .pagination {
+      margin: 15px 0;
+      text-align: center;
+      width: 90%;
+    }
+
+    /** 弹窗 **/
+    /* 遮罩层 */
+    .modal-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 20px; /* 安全边距 */
+      box-sizing: border-box;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.3s;
+    }
+
+    /* 弹窗容器 */
+    .modal-container {
+      position: relative;
+      top: 50%;
+      left: 50%;
+      margin-left: -400px;
+      margin-top: -300px;
+      width: 800px;
+      height:600px;
+      max-width: 90%;
+      max-height: 90vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 8px;
+      animation: modalSlide 0.3s ease;
+    }
+
+
+    /* 弹窗容器 */
+    .view-container {
+      position: relative;
+      width: 100%;
+      height:100%;
+      overflow: hidden;
+      background: #fff;
+      border-radius: 8px;
+      animation: modalSlide 0.3s ease;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-left: 16px;
+      padding-right: 16px;
+      padding-top:0px;
+      padding-bottom:0px;
+      border-bottom: 1px solid #ebeef5;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      color: #303133;
+    }
+
+    .close-btn {
+      font-size: 24px;
+      color: #909399;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .close-btn:hover {
+      color: #409eff;
+    }
+
+    .modal-body {
+      padding: 10px;
+    }
+
+    .form-row {
+      display: inline-block;
+      gap: 24px;
+      width: 90%;
+      margin-bottom: 18px;
+    }
+
+    .form-item {
+      flex: 1;
+    }
+
+    .form-item label {
+      display: block;
+      margin-bottom: 8px;
+      color: #606266;
+      font-size: 14px;
+    }
+
+    .required {
+      color: #f56c6c;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #dcdfe6;
+      border-radius: 4px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      border-color: #409eff;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(64,158,255,0.2);
+    }
+
+    .error-msg {
+      color: #f56c6c;
+      font-size: 12px;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #ebeef5;
+      text-align: right;
+    }
+
+    .btn {
+      padding: 9px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+
+    .btn--primary {
+      background: #409eff;
+      color: white;
+    }
+
+    .btn--outline {
+      background: #f0f2f5;
+      color: #606266;
+      border: 1px solid #dcdfe6;
+    }
+
+    .input-error {
+      border-color: #f56c6c !important;
+      background-color: #fef0f0;
+    }
+  </style>
+</head>
+<body>
+<!-- 查询区域容器 -->
+<div class="query-container">
+  <!-- 表单组 -->
+  <div class="query-group">
+    <!-- 输入框 -->
+    <div class="query-item">
+      <label for="keyword">关键词</label>
+      <input
+              type="text"
+              id="keyword"
+              placeholder="请输入搜索关键词..."
+              class="query-input"
+      />
+    </div>
+
+    <!-- 下拉选择 -->
+    <div class="query-item">
+      <label for="selectProject">所属项目</label>
+      <select id="selectProject" class="query-select">
+        <option value="">全部项目</option>
+      </select>
+    </div>
+    <div class="query-item">
+      <label for="selectTag">所属Tag</label>
+      <select id="selectTag" class="query-select">
+        <option value="">全部Tag</option>
+      </select>
+    </div>
+    <div class="query-item">
+      <label for="selectBranch">所属Branch</label>
+      <select id="selectBranch" class="query-select">
+        <option value="">全部Branch</option>
+      </select>
+    </div>
+
+    <!-- 日期选择 -->
+    <div class="query-item">
+      <label>日期范围</label>
+      <div class="date-range">
+        <input type="date" class="query-date" id="queryDateStart"/>
+        <span class="separator">至</span>
+        <input type="date" class="query-date" id="queryDateEnd"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- 操作按钮组 -->
+  <div class="action-group">
+    <button class="btn btn--primary" onclick="loadPage(1);">
+      <i class="icon-search"></i>
+      查询
+    </button>
+    <button class="btn btn--outline" onclick="loadPage()">
+      重置
+    </button>
+
+    <div style="width:100%;display: flex; gap: 10px; justify-content: flex-end">
+    </div>
+
+  </div>
+</div>
+
+<div class="table-container">
+<table class="treegrid-table vue-table vue-table--striped vue-table--hover">
+  <thead class="vue-table__header">
+  <tr>
+    <th>名称</th>
+    <th width="300">操作</th>
+  </tr>
+  </thead>
+  <tbody class="vue-table__body" id="treegrid-body"></tbody>
+</table>
+</div>
+<div class="pagination">
+  <button id="prev-page">上一页</button>
+  <span id="page-info">第1页/共1页</span>
+  <button id="next-page">下一页</button>
+</div>
+
+<!-- 弹窗结构 -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal-container" id="modalContainer">
+    <div class="modal-header">
+      <h1 class="modal-title">新增数据</h1>
+      <span class="close-btn" id="closeModal">×</span>
+    </div>
+
+    <div class="modal-body">
+      <form id="dataForm">
+        <input type="hidden" id="docPid"/>
+        <input type="hidden" id="docId"/>
+        <div class="form-row">
+          <div class="form-item">
+            <label>标题<span class="required">*</span></label>
+            <input type="text" id="docTitle"
+                   placeholder="请输入文档标题"
+                   data-validate="required">
+            <div class="error-msg" id="docTitleError"></div>
+          </div>
+          <div class="form-item">
+            <label>文件内容</label>
+            <!-- 文件字段 -->
+            <input type="file" name="file" id="docContent">
+          </div>
+          <div class="form-item">
+            <label>所属项目</label>
+            <select id="docProjectId">
+            </select>
+          </div>
+          <div class="form-item">
+            <label>所属Tag</label>
+            <select id="docTagId">
+            </select>
+          </div>
+          <div class="form-item">
+            <label>所属Branch</label>
+            <select id="docBranchId">
+            </select>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn--primary" id="submitBtn">提交</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<!-- 弹窗结构 -->
+<div class="modal-mask" id="viewMask">
+  <div class="view-container" id="viewContainer">
+    <div class="modal-header">
+      <h1 class="modal-title">查看文档内容</h1>
+      <span class="close-btn" id="closeViewModal" onclick="closeViewModal()">×</span>
+    </div>
+
+    <div class="modal-body">
+      <iframe id="viewIframe" src="about:blank" style="width: 100%;height:660px;"></iframe>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  function addDoc(btn)
+  {
+      var node_pid=$(btn).attr("node_pid");
+
+      $('#modalMask').fadeIn(200);
+      $('#modalContainer')
+              .css({ opacity: 0, transform: 'translateY(-20px)' })
+              .animate({ opacity: 1, transform: 'translateY(0)' }, 300).find("#docPid").val(node_pid);
+    $.ajax({
+      method: 'GET',
+      url: '/api/demand-docs/loadBasicInfo',
+      dataType: 'json',
+      success: function(response) {
+        var dataMap=response.data;
+        var projects=dataMap.projects;
+        var tags=dataMap.tags;
+        var branchs=dataMap.branchs;
+        $("#docProjectId").html("");
+        for(project in projects)
+        {
+          var optionObj=projects[project];
+          $("#docProjectId").append("<option value='"+optionObj.id+"'>"+optionObj.title+"</option>");
+        }
+        $("#docTagId").html("");
+        for(tag in tags)
+        {
+          var optionObj=tags[tag];
+          $("#docTagId").append("<option value='"+optionObj.id+"'>"+optionObj.title+"</option>");
+        }
+        $("#docBranchId").html("");
+        for(branch in branchs)
+        {
+          var optionObj=branchs[branch];
+          $("#docBranchId").append("<option value='"+optionObj.id+"'>"+optionObj.title+"</option>");
+        }
+      }
+    });
+
+  }
+
+  function editDoc(btn)
+  {
+    var node_id=$(btn).attr("node_id");
+
+    $('#modalMask').fadeIn(200);
+    $('#modalContainer')
+            .css({ opacity: 0, transform: 'translateY(-20px)' })
+            .animate({ opacity: 1, transform: 'translateY(0)' }, 300).find("#docId").val(node_id);
+    $.ajax({
+      method: 'POST',
+      url: '/api/demand-docs/get',
+      data: {id:node_id},
+      dataType: 'json',
+      success: function(response) {
+        var dataMap=response.data;
+        var projects=dataMap.projects;
+        var tags=dataMap.tags;
+        var branchs=dataMap.branchs;
+        var documentData=dataMap.document;
+        $("#docProjectId").html("");
+        for(project in projects)
+        {
+          var optionObj=projects[project];
+          $("#docProjectId").append("<option value='"+optionObj.id+"'>"+optionObj.title+"</option>");
+        }
+        $("#docTagId").html("");
+        for(tag in tags)
+        {
+          var optionObj=tags[tag];
+          $("#docTagId").append("<option value='"+optionObj.id+"'>"+optionObj.title+"</option>");
+        }
+        $("#docBranchId").html("");
+        for(branch in branchs)
+        {
+          var optionObj=branchs[branch];
+          $("#docBranchId").append("<option value='"+optionObj.id+"'>"+optionObj.title+"</option>");
+        }
+
+        $('#docId').val(documentData.id);
+        $('#docPid').val(documentData.pid);
+        $('#docTitle').val(documentData.title);
+        $('#docProjectId').val(documentData.projectId);
+        $('#docTagId').val(documentData.tagId);
+        $('#docBranchId').val(documentData.branchId);
+      }
+    });
+
+  }
+
+
+  function viewDoc(btn)
+  {
+    var node_id=$(btn).attr("node_id");
+    $('#viewMask').fadeIn(200);
+    $('#viewContainer')
+            .css({ opacity: 0, transform: 'translateY(-20px)' })
+            .animate({ opacity: 1, transform: 'translateY(0)' }, 300).find("#docId").val(node_id);
+    $('#viewIframe')[0].src = "/view2.html?id="+node_id;
+  }
+
+  // 加载分页数据
+  function loadBasicInfo() {
+    $.ajax({
+      method: 'GET',
+      url: '/api/demand-docs/loadBasicInfo',
+      dataType: 'json',
+      success: function(response) {
+        var dataMap=response.data;
+        var projects=dataMap.projects;
+        var tags=dataMap.tags;
+        var branchs=dataMap.branchs;
+        $("#selectProject").html("<option value=''>全部项目</option>");
+        $("#selectTag").html("<option value=''>全部Tag</option>");
+        $("#selectBranch").html("<option value=''>全部Branch</option>");
+        for(project in projects)
+        {
+          var optionObj=projects[project];
+          $("#selectProject").append("<option value='"+optionObj.id+"'>"+optionObj.title+"</option>");
+        }
+        for(tag in tags)
+        {
+          var optionObj=tags[tag];
+          $("#selectTag").append("<option value='"+optionObj.id+"'>"+optionObj.title+"</option>");
+        }
+        for(branch in branchs)
+        {
+          var optionObj=branchs[branch];
+          $("#selectBranch").append("<option value='"+optionObj.id+"'>"+optionObj.title+"</option>");
+        }
+      }
+    });
+  }
+  $(document).ready(function() {
+    let currentPage = 1;
+    let totalPages = 1;
+    const pageSize = 10;
+    let currentPid=0;
+    // 初始化树形表格
+    function initTreegrid() {
+      $('.treegrid-table').treegrid({
+        expanderExpandedClass: 'treegrid-expander-expanded',
+        expanderCollapsedClass: 'treegrid-expander-collapsed'
+      });
+    }
+
+    // 加载分页数据
+    function loadPage(page) {
+      var queryData={};
+      if(!page)
+      {
+        $(".query-input").val("");
+        $(".query-select").val("");
+        $(".query-date").val("");
+        queryData.pageSize=pageSize;
+        queryData.pageNo=1;
+      }else
+      {
+        var title=$("#keyword").val().trim();
+        var projectId=$("#selectProject").val();
+        var tagId=$("#selectTag").val();
+        var branchId=$("#selectBranch").val();
+        var beginDate=$("#queryDateStart").val();
+        var endDate=$("#queryDateEnd").val();
+        queryData={title:title,projectId:projectId,tagId:tagId,branchId:branchId,beginDate:beginDate,endDate:endDate, pageNo: page, pageSize: pageSize };
+      }
+      $.ajax({
+        method: 'POST',
+        url: '/api/demand-docs/list',
+        dataType: 'json',
+        data: queryData,
+        success: function(response) {
+          currentPage = response.pageNo;
+          totalPages = response.totalPages;
+          renderTable(response.list);
+          updatePagination();
+          initTreegrid();
+        }
+      });
+    }
+    window.loadPage=loadPage;
+    // 渲染表格
+    function renderTable(nodes) {
+      const tbody = $('#treegrid-body').empty();
+      nodes.forEach(node => {
+           appendNodeRow(tbody, node);
+      });
+    }
+
+    // 递归添加节点行
+    function appendNodeRow(parent, node) {
+      const row = $(`
+            <tr class="treegrid-${node.id} ${node.pid ? 'treegrid-parent-'+node.pid : ''}">
+                <td>
+                    ${'<span class="treegrid-indent"></span>'.repeat(node.pid.length)}
+                    ${node.text}
+                </td>
+                <td>
+                    <button node_id="${node.id}" class="btn btn--primary" onclick="viewDoc(this)">查看</button>
+                    <button node_pid="${node.pid}" class="addModal btn btn-add" onclick="addDoc(this)">添加</button>
+                    <button node_id="${node.id}" class="updateModal btn btn-add" onclick="editDoc(this)">修改</button>
+                    <button node_id="${node.id}" class="deleteModal btn btn-delete">删除</button>
+                </td>
+            </tr>
+        `);
+
+      parent.append(row);
+
+      // 如果有缓存子节点
+      if(node.children && node.children.length > 0) {
+        node.children.forEach(child => {
+          appendNodeRow(parent, child, level + 1);
+        });
+      }
+    }
+
+    // 加载子节点
+    $('#treegrid-body').on('click', '.treegrid-expander', function() {
+      const row = $(this).closest('tr');
+      const nodeId = row.find('td:first').text();
+
+      if(row.hasClass('loading') || row.data('loaded')) return;
+
+      row.addClass('loading');
+      $.ajax({
+        method: 'POST',
+        data:{pageNo: currentPage, pageSize: pageSize },
+        url: `/api/demand-docs/list`,
+        success: function(data) {
+          var children=data.list;
+          children.forEach(child => {
+            appendNodeRow(row.parent(), child, row.find('.treegrid-indent').length + 1);
+          });
+          row.data('loaded', true);
+          $('.treegrid-table').treegrid();
+          row.removeClass('loading');
+        }
+      });
+    });
+
+    // 分页控制
+    $('#prev-page').click(() => currentPage > 1 && loadPage(currentPage - 1));
+    $('#next-page').click(() => currentPage < totalPages && loadPage(currentPage + 1));
+
+    function updatePagination() {
+      $('#page-info').text(`第${currentPage}页/共${totalPages}页`);
+      $('#prev-page').prop('disabled', currentPage === 1);
+      $('#next-page').prop('disabled', currentPage === totalPages);
+    }
+
+    // 初始化加载第一页
+    loadPage(1);
+    // 加载查询表单中的下拉列表
+    loadBasicInfo();
+
+    // 关闭弹窗
+    function closeModal() {
+      $('#modalContainer').animate({
+        opacity: 0,
+        transform: 'translateY(-20px)'
+      }, 200, function() {
+        $('#modalMask').fadeOut(100);
+        clearForm();
+      });
+    }
+
+
+    // 关闭事件绑定
+    $('#closeModal, #cancelModal, #modalMask').click(function(e) {
+      if(e.target === this) closeModal();
+    });
+
+    // 表单验证
+    function validateForm() {
+      let isValid = true;
+      $('[data-validate]').each(function() {
+        const $input = $(this);
+        const $error = $input.next('.error-msg');
+
+        if($input.attr('data-validate').includes('required') && !$input.val().trim()) {
+          $input.addClass('input-error');
+          $error.text('该字段为必填项').show();
+          isValid = false;
+        } else {
+          $input.removeClass('input-error');
+          $error.hide();
+        }
+      });
+      return isValid;
+    }
+
+    // 提交表单
+    $('#submitBtn').click(function() {
+      if(!validateForm()) return;
+      // 创建 FormData 对象
+      const formData = new FormData();
+      formData.set("id",$('#docId').val());
+      formData.set("pid",$('#docPid').val());
+      formData.set("text",$('#docTitle').val());
+      formData.set("projectId",$('#docProjectId').val());
+      formData.set("tagId",$('#docTagId').val());
+      formData.set("branchId",$('#docBranchId').val());
+      formData.set("content",$('#docContent')[0].files[0]);
+      // 模拟AJAX提交
+      $(this).prop('disabled', true).text('提交中...');
+
+      // 发送 AJAX 请求
+      $.ajax({
+        url: '/api/demand-docs/saveOrUpdate',
+        type: 'POST',
+        data: formData,
+        processData: false,  // 关键配置
+        contentType: false,  // 关键配置
+        success: function(response) {
+          $(this).prop('disabled', false).text('提交');
+          closeModal();
+          alert('提交成功！');
+        },
+        error: function(xhr) {
+          $(this).prop('disabled', false).text('提交');
+          alert('提交失败！');
+        }
+      });
+
+
+    });
+
+    // 清空表单
+    function clearForm() {
+      $('#dataForm')[0].reset();
+      $('.error-msg').hide();
+      $('.input-error').removeClass('input-error');
+    }
+
+    // 实时验证
+    $('#docTitle').on('blur', function() {
+      if(!$(this).val().trim()) {
+        $(this).addClass('input-error');
+        $('#docTitleError').text('该字段为必填项').show();
+      } else {
+        $(this).removeClass('input-error');
+        $('#docTitleError').hide();
+      }
+    });
+
+
+
+  });
+  // 关闭弹窗
+  function closeViewModal() {
+    $('#viewContainer').animate({
+      opacity: 0,
+      transform: 'translateY(-20px)'
+    }, 200, function() {
+      $('#viewMask').fadeOut(100);
+      const iframeDoc = $('#viewIframe')[0].contentDocument || $('#viewIframe')[0].contentWindow.document;
+      // 直接修改内容
+      $(iframeDoc).find('body').html("");
+    });
+  }
+
+
+
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
--- 商品表 (存储商品信息)
+-- 商品表 (存储商品信息),所属database：product
 CREATE TABLE `product` (
-  `product_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '商品ID',
+  `product_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '商品ID',//商品id，也叫商品编号
   `product_name` VARCHAR(200) NOT NULL COMMENT '商品名称',
   `description` TEXT COMMENT '商品描述',
   `price` DECIMAL(10,2) NOT NULL COMMENT '商品价格',
@@ -13,7 +13,7 @@ CREATE TABLE `product` (
 
 ######
 
--- 订单表 (存储订单信息)
+-- 订单表 (存储订单信息),所属database：order
 CREATE TABLE `order` (
   `order_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '订单ID',
   `user_id` BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
@@ -28,7 +28,7 @@ CREATE TABLE `order` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='订单表';
 
 ######
--- 订单详情表（订单和商品关联表）
+-- 订单详情表（订单和商品关联表）,所属database：order
 CREATE TABLE `order_item` (
   `order_item_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '订单商品ID',
   `order_id` BIGINT UNSIGNED NOT NULL COMMENT '订单ID',

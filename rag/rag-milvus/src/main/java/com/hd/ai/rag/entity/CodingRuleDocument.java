@@ -3,6 +3,7 @@ package com.hd.ai.rag.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.apache.ibatis.type.JdbcType;
 
 import java.time.LocalDateTime;
 @Data
@@ -15,8 +16,7 @@ public class CodingRuleDocument {
     @TableField("title")
     private String title;
 
-
-    @TableField("content")
+    @TableField(value = "content", jdbcType = JdbcType.LONGVARCHAR)
     private String content;
 
     @TableField("project_id")

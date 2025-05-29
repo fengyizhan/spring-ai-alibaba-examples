@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>AI</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/jquery-3.7.0.min.js"></script>
 
     <script defer>
         let eventSource;
@@ -26,7 +26,7 @@
             $('#messageInput').val('');
 
             // 建立SSE连接
-            eventSource = new EventSource(`http://127.0.0.1:8080/vector/tableSql?message=${encodeURIComponent(message)}`);
+            eventSource = new EventSource(`/vector/tableSql?message=${encodeURIComponent(message)}`);
 
             eventSource.onmessage = (e) => {
                 const lastDiv = $('#chatBox .ai-msg:last');

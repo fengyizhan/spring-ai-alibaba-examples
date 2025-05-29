@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @MapperScan("com.hd.ai.rag.mapper")
-public class ChatMemoryApplication {
+public class AiApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ChatMemoryApplication.class, args);
+        SpringApplication.run(AiApplication.class, args);
     }
 
 }

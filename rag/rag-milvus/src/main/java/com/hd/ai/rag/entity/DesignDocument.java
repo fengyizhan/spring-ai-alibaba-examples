@@ -3,10 +3,9 @@ package com.hd.ai.rag.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.apache.ibatis.type.JdbcType;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 // DesignDocument.java
 @Data
@@ -22,11 +21,8 @@ public class DesignDocument {
     @TableField("pid")
     private String pid;
 
-    @TableField("content")
+    @TableField(value = "content", jdbcType = JdbcType.LONGVARCHAR)
     private String content;
-
-    @TableField("order_number")
-    private Integer orderNumber;
 
     @TableField(value = "create_date", fill = FieldFill.INSERT)
     private LocalDateTime createDate;
@@ -40,5 +36,4 @@ public class DesignDocument {
     private String tagId;
     @TableField("project_id")
     private String projectId;
-    private List<DesignDocument> children=new ArrayList<>();
 }

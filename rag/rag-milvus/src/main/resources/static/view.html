@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/js/jquery-3.7.0.min.js"></script>
+  <script src="/js/marked.min.js"></script>
+  <style>
+    body
+    {
+      margin:0px;
+      padding:0px;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+<div id="viewContent">
+
+</div>
+
+<script defer>
+  $(document).ready(
+     function() {
+
+       const params = new URLSearchParams(window.location.search);
+       const node_id = params.get('id');
+       $.ajax({
+         method: 'POST',
+         url: '/api/design-docs/getContent',
+         data: {id:node_id},
+         dataType: 'json',
+         success: function(response) {
+           var dataMap=response.data;
+           var documentContent=dataMap.content;
+           // 直接修改内容
+           marked.parse(documentContent,{ async: true })
+                   .then(
+                           function (html)
+                           {
+                             $("#viewContent").html(html);
+                           }
+                   )
+                   .catch(
+                           function (err) {
+                             $("#viewContent").html(err);
+                           }
+                   );
+         }
+       });
+
+  });
+
+</script>
+</body>
+</html>

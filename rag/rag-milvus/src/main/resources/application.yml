@@ -25,7 +25,7 @@ logging:
         web:
           client:
             RestTemplate: debug
-    root: debug
+    root: info
     io:
       modelcontextprotocol:
         client: DEBUG
@@ -55,7 +55,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:13306/ai?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:13306/documents?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: huading123
     type: com.alibaba.druid.pool.DruidDataSource

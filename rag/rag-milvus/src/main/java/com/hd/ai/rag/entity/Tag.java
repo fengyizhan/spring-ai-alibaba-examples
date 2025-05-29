@@ -13,8 +13,8 @@ public class Tag {
     private String id;
     @TableField("title")
     private String title;
-    @TableField("desc")
-    private String desc;
+    @TableField("note")
+    private String note;
     @TableField("order_number")
     private Integer orderNumber;
     @TableField(value = "create_date", fill = FieldFill.INSERT)
