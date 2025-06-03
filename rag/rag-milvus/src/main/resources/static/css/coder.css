@@ -13,16 +13,36 @@
     padding: 0;
 }
 #menu ul li {
-    padding: 10px;
     border-bottom: 1px solid #409eff;
     --hover-color: #f5f7fa;
 }
 #menu ul li a {
     text-decoration: none;
     color: #333;
+    display: block;
+    padding: 10px;
+    width: 100%;
 }
 #content {
     flex-grow: 1;
     padding: 20px;
 }
 body{margin:0px;}
+
+/* 悬停样式 */
+li:hover {
+    background-color: #e0e0e0;
+    transform: translateX(5px);
+}
+
+/* 点击后样式 - 使用:active伪类 */
+li:active {
+    background-color: #d0d0d0;
+    color: #333;
+}
+/* 如果你希望点击后保持样式，可以结合JavaScript和一个类 */
+li.clicked {
+    background-color: #c0c0c0;
+    color: #555;
+    font-weight: bold;
+}

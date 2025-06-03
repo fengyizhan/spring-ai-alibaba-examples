@@ -6,6 +6,8 @@ $(document).ready(function() {
         e.preventDefault(); // 阻止默认链接行为
         var content = $(this).data('content'); // 获取data-content属性值
         loadContent(content); // 加载对应的内容
+        $(this).parent().parent().children("li").removeClass("clicked");
+        $(this).parent().addClass("clicked");
     });
 });
 
@@ -14,22 +16,22 @@ function loadContent(content) {
     $('#content').html('<h2>加载中...</h2>'); // 显示加载中信息，可根据实际需要调整加载动画等UI元素。
     switch(content) {
         case 'demand_doc':
-            $('#content').load('./views/demand_doc.html');
+            $('#content').load('./views/demand_doc.html?t='+new Date().getTime());
             break;
         case 'design_doc':
-            $('#content').load('./views/design_doc.html');
+            $('#content').load('./views/design_doc.html?t='+new Date().getTime());
             break;
         case 'coding_rule_doc':
-            $('#content').load('./views/coding_rule_doc.html');
+            $('#content').load('./views/coding_rule_doc.html?t='+new Date().getTime());
             break;
         case 'project':
-            $('#content').load('./views/project.html');
+            $('#content').load('./views/project.html?t='+new Date().getTime());
             break;
         case 'tag':
-            $('#content').load('./views/tag.html');
+            $('#content').load('./views/tag.html?t='+new Date().getTime());
             break;
         case 'branch':
-            $('#content').load('./views/branch.html');
+            $('#content').load('./views/branch.html?t='+new Date().getTime());
             break;
         default:
             $('#content').html('<h2>页面未找到</h2>'); // 如果content值不匹配任何已知情况，显示错误信息。

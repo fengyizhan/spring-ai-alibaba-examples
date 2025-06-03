@@ -639,7 +639,21 @@
 
   }
 
-
+  function deleteDoc(btn)
+  {
+    var ifConfirm=confirm("确定要删除吗？");
+    if(!ifConfirm) return;
+    var node_id=$(btn).attr("node_id");
+    $.ajax({
+      method: 'POST',
+      url: '/api/design-docs/delete',
+      data: {id:node_id},
+      dataType: 'json',
+      success: function(response) {
+        loadPage(window.currentPage);//刷新
+      }
+    });
+  }
   function viewDoc(btn)
   {
     var node_id=$(btn).attr("node_id");
@@ -722,6 +736,7 @@
         data: queryData,
         success: function(response) {
           currentPage = response.pageNo;
+          window.currentPage=currentPage;
           totalPages = response.totalPages;
           renderTable(response.list);
           updatePagination();
@@ -750,7 +765,7 @@
                     <button node_id="${node.id}" class="btn btn--primary" onclick="viewDoc(this)">查看</button>
                     <button node_pid="${node.pid}" class="addModal btn btn-add" onclick="addDoc(this)">添加</button>
                     <button node_id="${node.id}" class="updateModal btn btn-add" onclick="editDoc(this)">修改</button>
-                    <button node_id="${node.id}" class="deleteModal btn btn-delete">删除</button>
+                    <button node_id="${node.id}" class="deleteModal btn btn-delete" onclick="deleteDoc(this)">删除</button>
                 </td>
             </tr>
         `);
@@ -865,10 +880,10 @@
         success: function(response) {
           $(this).prop('disabled', false).text('提交');
           closeModal();
-          alert('提交成功！');
+          loadPage(window.currentPage);
         },
         error: function(xhr) {
-          $(this).prop('disabled', false).text('提交');
+          $(this).prop('disabled', true).text('提交');
           alert('提交失败！');
         }
       });

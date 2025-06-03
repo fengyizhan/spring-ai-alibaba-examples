@@ -1,5 +1,6 @@
 package com.hd.ai.rag.controller.coding;
 
+import com.aliyuncs.utils.StringUtils;
 import com.hd.ai.rag.common.AjaxResult;
 import com.hd.ai.rag.common.IdUtil;
 import com.hd.ai.rag.common.PageData;
@@ -58,7 +59,7 @@ public class DemandDocController {
     public AjaxResult<DemandDocument> saveOrUpdate(@ModelAttribute DemandDocumentDto demandDocumentDto, // 接收普通字段
                                                    @RequestPart(name="content",required=false) MultipartFile file) { // 接收文件) {
         DemandDocument doc=new DemandDocument();
-        if(demandDocumentDto.getId()==null)
+        if(StringUtils.isEmpty(demandDocumentDto.getId()))
         {
             doc.setId(IdUtil.getSnowflakeNextIdStr());
             doc.setPid(demandDocumentDto.getPid());
@@ -82,10 +83,6 @@ public class DemandDocController {
         boolean isSuccess=docService.saveOrUpdate(doc);
         return AjaxResult.success();
     }
-    @PostMapping("delete")
-    public AjaxResult<DemandDocument> del(String id) {
-        return AjaxResult.success(docService.delDocument(id));
-    }
 
     @PostMapping("get")
     public AjaxResult<DemandDocument> get(String id) {
@@ -101,6 +98,11 @@ public class DemandDocController {
         return AjaxResult.success(data);
     }
 
+    @PostMapping("delete")
+    public AjaxResult deleteDoc(String id) {
+        boolean result=docService.delDocument(id);
+        return AjaxResult.success();
+    }
 
     @PostMapping("getContent")
     public AjaxResult getContent(String id) {
