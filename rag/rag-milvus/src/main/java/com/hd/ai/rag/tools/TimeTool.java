@@ -22,6 +22,7 @@ public class TimeTool {
         Date currentTime=Calendar.getInstance().getTime();
         SimpleDateFormat  dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         String formatDateStr = dateFormat.format(currentTime);
+        log.info("TimeTool getTimeNow:"+formatDateStr);
         return formatDateStr;
     }
 

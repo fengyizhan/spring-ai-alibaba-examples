@@ -1,5 +1,6 @@
 package com.hd.ai.rag.controller;
 
+import com.hd.ai.rag.tools.TickTool;
 import com.hd.ai.rag.tools.TimeTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -58,7 +59,7 @@ public class ChatController {
                     .advisors(spec -> spec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
                             // 继续在 Lambda 表达式中调用 .param 方法，设置聊天记忆的检索大小为 100
                             .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
-                    .tools(new TimeTool())
+                    .tools(new TimeTool(),new TickTool())
                     .call()
                     .content();
             log.info("toolcall text --> [{}]", text);
