@@ -42,6 +42,12 @@ spring:
     view:
       prefix: /views/
       suffix: .html
+  # 启用跨域支持
+    cors:
+      allowed-origins: '*'
+      allowed-methods: 'GET,POST'
+
+
   main:
     allow-bean-definition-overriding: true
   application:
