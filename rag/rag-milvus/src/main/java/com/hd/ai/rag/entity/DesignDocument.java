@@ -21,6 +21,9 @@ public class DesignDocument {
     @TableField("pid")
     private String pid;
 
+    @TableField("type")
+    private Integer type;
+
     @TableField(value = "content", jdbcType = JdbcType.LONGVARCHAR)
     private String content;
 

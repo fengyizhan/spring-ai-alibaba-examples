@@ -71,6 +71,7 @@ public class DesignDocController {
         doc.setTagId(designDocumentDto.getTagId());
         doc.setBranchId(designDocumentDto.getBranchId());
         doc.setProjectId(designDocumentDto.getProjectId());
+        doc.setType(designDocumentDto.getType());
         try {//更新内容
             if(file!=null)
             {
@@ -113,8 +114,8 @@ public class DesignDocController {
     }
 
     @PostMapping("/list")
-    public PageData<DesignDocumentDto> list(String projectId, String branchId, String tagId, String title,String beginDate,String endDate,Integer pageNo, Integer pageSize) {
-        PageData<DesignDocumentDto> page=docService.getDocumentTree(projectId,branchId,tagId,title,beginDate,endDate,pageNo,pageSize);
+    public PageData<DesignDocumentDto> list(String projectId, String branchId, String tagId, String title,Integer type,String beginDate,String endDate,Integer pageNo, Integer pageSize) {
+        PageData<DesignDocumentDto> page=docService.getDocumentTree(projectId,branchId,tagId,title,type,beginDate,endDate,pageNo,pageSize);
         return page;
     }
 }

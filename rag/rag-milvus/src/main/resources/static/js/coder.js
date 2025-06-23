@@ -37,3 +37,32 @@ function loadContent(content) {
             $('#content').html('<h2>页面未找到</h2>'); // 如果content值不匹配任何已知情况，显示错误信息。
     }
 }
+
+/**
+ * post协议，打开新窗口
+ * @param url 地址
+ * @param data json格式数据包
+ */
+function openPostWindow(url, data) {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+    form.target = '_blank'; // 在新窗口中打开
+
+    for (var key in data) {
+        if (data.hasOwnProperty(key)) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = data[key];
+            form.appendChild(input);
+        }
+    }
+    document.body.appendChild(form); // 添加到DOM中
+    form.submit(); // 提交表单
+    document.body.removeChild(form); // 提交后移除表单
+    // 发送方
+    sessionStorage.setItem('documentsData', JSON.stringify(data));
+    // 接收方
+    //const data = JSON.parse(sessionStorage.getItem('postData'));
+}

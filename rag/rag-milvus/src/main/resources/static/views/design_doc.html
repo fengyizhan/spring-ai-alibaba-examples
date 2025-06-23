@@ -433,6 +433,15 @@
         <option value="">全部Branch</option>
       </select>
     </div>
+    <div class="query-item">
+      <label for="selectType">文档类型</label>
+      <select id="selectType" class="query-select">
+        <option value="">全部类型</option>
+        <option value="1">设计文档</option>
+        <option value="2">编码规范</option>
+        <option value="3">项目说明</option>
+      </select>
+    </div>
 
     <!-- 日期选择 -->
     <div class="query-item">
@@ -456,6 +465,9 @@
     </button>
 
     <div style="width:100%;display: flex; gap: 10px; justify-content: flex-end">
+      <button class="btn btn--success" onclick="codingPage()">
+        编程智能体
+      </button>
     </div>
 
   </div>
@@ -518,7 +530,14 @@
             <select id="docBranchId">
             </select>
           </div>
-
+          <div class="form-item">
+            <label>类型</label>
+            <select id="docType">
+              <option value="1">设计文档</option>
+              <option value="2">编码规范</option>
+              <option value="3">项目说明</option>
+            </select>
+          </div>
         </div>
       </form>
     </div>
@@ -550,6 +569,13 @@
 
 
 <script>
+  function codingPage()
+  {
+  // 获取屏幕可用宽高（排除任务栏）
+    const width = window.screen.availWidth;
+    const height = window.screen.availHeight;
+    window.open('/coding/agent/coding','_blank',`width=${width},height=${height},top=0,left=0,scrollbars=yes,resizable=yes,status=no,toolbar=no,menubar=no,location=no`);
+  }
   function addDoc(btn)
   {
       var node_pid=$(btn).attr("node_pid");
@@ -558,6 +584,7 @@
       $('#modalContainer')
               .css({ opacity: 0, transform: 'translateY(-20px)' })
               .animate({ opacity: 1, transform: 'translateY(0)' }, 300).find("#docPid").val(node_pid);
+    $("#submitBtn").prop('disabled', false).text('提交');
     $.ajax({
       method: 'GET',
       url: '/api/design-docs/loadBasicInfo',
@@ -598,6 +625,7 @@
     $('#modalContainer')
             .css({ opacity: 0, transform: 'translateY(-20px)' })
             .animate({ opacity: 1, transform: 'translateY(0)' }, 300).find("#docId").val(node_id);
+    $("#submitBtn").prop('disabled', false).text('提交');
     $.ajax({
       method: 'POST',
       url: '/api/design-docs/get',
@@ -634,6 +662,7 @@
         $('#docProjectId').val(documentData.projectId);
         $('#docTagId').val(documentData.tagId);
         $('#docBranchId').val(documentData.branchId);
+        $('#docType').val(documentData.type);
       }
     });
 
@@ -727,7 +756,8 @@
         var branchId=$("#selectBranch").val();
         var beginDate=$("#queryDateStart").val();
         var endDate=$("#queryDateEnd").val();
-        queryData={title:title,projectId:projectId,tagId:tagId,branchId:branchId,beginDate:beginDate,endDate:endDate, pageNo: page, pageSize: pageSize };
+        var type=$("#selectType").val();
+        queryData={title:title,projectId:projectId,tagId:tagId,branchId:branchId,type:type,beginDate:beginDate,endDate:endDate, pageNo: page, pageSize: pageSize };
       }
       $.ajax({
         method: 'POST',
@@ -866,6 +896,7 @@
       formData.set("projectId",$('#docProjectId').val());
       formData.set("tagId",$('#docTagId').val());
       formData.set("branchId",$('#docBranchId').val());
+      formData.set("type",$('#docType').val());
       formData.set("content",$('#docContent')[0].files[0]);
       // 模拟AJAX提交
       $(this).prop('disabled', true).text('提交中...');

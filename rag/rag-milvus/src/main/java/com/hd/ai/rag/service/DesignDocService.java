@@ -35,12 +35,13 @@ public class DesignDocService extends ServiceImpl<DesignDocMapper, DesignDocumen
         return this.saveOrUpdate(doc);
     }
 
-    public PageData<DesignDocumentDto> getDocumentTree(String projectId, String branchId, String tagId, String title,String beginDate,String endDate,Integer pageNo, Integer pageSize) {
+    public PageData<DesignDocumentDto> getDocumentTree(String projectId, String branchId, String tagId, String title,Integer type,String beginDate,String endDate,Integer pageNo, Integer pageSize) {
         Page<DesignDocument> page = new Page<>(pageNo, pageSize);
         lambdaQuery()
                 .eq(StrUtil.isNotBlank(projectId), DesignDocument::getProjectId, projectId)
                 .eq(StrUtil.isNotBlank(branchId), DesignDocument::getBranchId, branchId)
                 .eq(StrUtil.isNotBlank(tagId), DesignDocument::getTagId, tagId)
+                .eq((type!=null && StrUtil.isNotBlank(type.toString())), DesignDocument::getType, type)
                 .orderByAsc(DesignDocument::getTitle)
                 .like(StrUtil.isNotBlank(title), DesignDocument::getTitle, title)
                 .and(StrUtil.isNotBlank(beginDate), con->

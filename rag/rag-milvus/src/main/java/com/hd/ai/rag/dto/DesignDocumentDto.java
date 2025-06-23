@@ -9,7 +9,7 @@ public class DesignDocumentDto {
     private String id;
     private String pid;
     private String text;
-
+    private Integer type;
     private String branchId;
     private String tagId;
     private String projectId;
