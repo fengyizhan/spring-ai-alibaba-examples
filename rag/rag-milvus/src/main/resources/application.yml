@@ -127,3 +127,6 @@ milvus:
   username: ${MILVUS_USERNAME:huading} # default: root
   password: ${MILVUS_PASSWORD:hdadmin} # default: milvus
 
+workspace:
+  root: D:\workspace\hdy-erp
+

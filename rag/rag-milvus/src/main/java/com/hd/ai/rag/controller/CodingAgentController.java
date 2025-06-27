@@ -14,7 +14,6 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +32,7 @@ import reactor.core.publisher.Flux;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -50,6 +46,9 @@ public class CodingAgentController {
     private DesignDocService designDocService;
     @Autowired
     private DemandDocService demandDocService;
+
+    @Value("${workspace.root}")
+    private String workspaceDir;
 
     @Value("classpath:/template/coding.txt")
     private Resource codingResource;
@@ -71,38 +70,101 @@ public class CodingAgentController {
         return modelAndView;
     }
 
-    @GetMapping("/tree")
-    public ResponseEntity<List<TreeNode>> getDirectoryTree(
-            @RequestParam(defaultValue = "") String path) {
+    @GetMapping("/fileTree")
+    public ResponseEntity<List<TreeNode>> getDirectoryTree() {
         try {
-            File root = path.isEmpty() ?
-                    new File(System.getProperty("user.dir")) :
-                    new File(path);
-            return ResponseEntity.ok(buildTree(root));
+            List<String> ignoredFiles=new ArrayList<>();
+            ignoredFiles.add(".git");
+            ignoredFiles.add("conf");
+            ignoredFiles.add("deploy");
+            ignoredFiles.add("doc");
+            ignoredFiles.add(".editorconfig");
+            ignoredFiles.add(".idea");
+            ignoredFiles.add("establish");
+            ignoredFiles.add(".gitignore");
+            ignoredFiles.add("pom.xml");
+            ignoredFiles.add(".github");
+            ignoredFiles.add(".editorconfig");
+            ignoredFiles.add("README.md");
+            ignoredFiles.add("build");
+            ignoredFiles.add("target");
+            TreeNode rootNode=buildTree2(workspaceDir,ignoredFiles);
+            return ResponseEntity.ok(rootNode.getChildren());
         } catch (Exception e) {
             return ResponseEntity.status(500).build();
         }
     }
 
-    private List<TreeNode> buildTree(File file) {
-        List<TreeNode> nodes = new ArrayList<>();
+    public static TreeNode buildTree2(String rootPath, List<String> ignoredFiles) {
+        File rootDir = new File(rootPath);
+        if (!rootDir.exists() || !rootDir.isDirectory()) {
+            throw new IllegalArgumentException("Invalid directory path");
+        }
+        return buildNode(rootDir,ignoredFiles);
+    }
+
+    private static TreeNode buildNode(File file,List<String> ignoredFiles) {
+        TreeNode node = new TreeNode();
+        node.setId(file.getAbsolutePath());
+        node.setTitle(file.getName());
+        node.setType(file.isDirectory() ? "folder" : "file");
+
         if (file.isDirectory()) {
             File[] children = file.listFiles();
-            if (children != null) {
+            if (children != null && children.length == 1 && children[0].isDirectory()) {
+                // 单子目录情况，递归合并
+                TreeNode mergedNode = buildNode(children[0],ignoredFiles);
+                node.setId(mergedNode.getId());
+                node.setTitle(node.getTitle() + "." + mergedNode.getTitle());
+                node.setChildren(mergedNode.getChildren());
+            } else if (children != null && children.length > 0) {
+                // 多子节点情况
+                List<TreeNode> childNodes = new ArrayList<>();
                 for (File child : children) {
-                    TreeNode node = new TreeNode();
-                    node.setId(child.getAbsolutePath());
-                    node.setName(child.getName());
-                    node.setType(child.isDirectory() ? "folder" : "file");
-                    node.setPath(child.getAbsolutePath());
-                    if (child.isDirectory()) {
-                        node.setChildren(buildTree(child));
+                    //如果是文件，那么直接添加到【当前节点】的【子节点】列表中
+                    if(ignoredFiles.indexOf(child.getName())>=0)
+                    {//排除不需要展示的文件和目录
+                        continue;
                     }
-                    nodes.add(node);
+                    childNodes.add(buildNode(child,ignoredFiles));
                 }
+                node.setChildren(childNodes);
             }
         }
-        return nodes;
+        return node;
+    }
+
+
+    private void buildTree(TreeNode rootNode,File currentFile, List<String> ignoredFiles) throws Exception {
+        if (currentFile.isDirectory()) {
+            File[] children = currentFile.listFiles();
+            List<TreeNode> currentLevelChildNodes = new ArrayList<>();
+            if (children != null) {
+                for (File child : children) {
+                    //如果是文件，那么直接添加到【当前节点】的【子节点】列表中
+                    if(ignoredFiles.indexOf(child.getName())>=0)
+                    {//排除不需要展示的文件和目录
+                        continue;
+                    }
+                    TreeNode node = new TreeNode();
+                    node.setId(child.getAbsolutePath());
+                    node.setTitle(child.getName());
+                    node.setType(child.isDirectory() ? "folder" : "file");
+//                    node.setPath(child.getAbsolutePath());
+                    if (child.isDirectory()) {
+                        File currentFolder = child; //先假定目录的根是当前
+                        while (currentFolder.listFiles()!=null&&currentFolder.listFiles().length==1)
+                        {
+                            currentFolder=currentFolder.listFiles()[0];
+                        }
+                        //如果是目录，递归向下继续遍历
+                         buildTree(node,child,ignoredFiles);
+                    }
+                    currentLevelChildNodes.add(node);
+                }
+                rootNode.setChildren(currentLevelChildNodes);
+            }
+        }
     }
 
     /**
@@ -118,7 +180,7 @@ public class CodingAgentController {
 
 
     @GetMapping(value = "/generate")
-    public Flux<ServerSentEvent<String>> generate(@RequestParam String userId, @RequestParam String demandDocIds, @RequestParam String designDocIds) {
+    public Flux<ServerSentEvent<String>> generate(@RequestParam String userId, @RequestParam String[] demandDocIds, @RequestParam String[] designDocIds) {
 
         String codingTemplate = null;
         try {
@@ -127,11 +189,11 @@ public class CodingAgentController {
             throw new RuntimeException(e);
         }
         SystemPromptTemplate systemPromptTemplate=new SystemPromptTemplate(codingTemplate);
-        List<DemandDocument> demandDocuments=demandDocService.getBaseMapper().selectByIds(Arrays.asList(demandDocIds.split(",")));
+        List<DemandDocument> demandDocuments=demandDocService.getBaseMapper().selectByIds(Arrays.asList(demandDocIds));
         StringBuffer demandDocBuffer=new StringBuffer();
         //需求文档
         demandDocuments.forEach(demandDocument -> { demandDocBuffer.append(demandDocument.getContent()); });
-        List<DesignDocument> designDocuments=designDocService.getBaseMapper().selectByIds(Arrays.asList(designDocIds.split(",")));
+        List<DesignDocument> designDocuments=designDocService.getBaseMapper().selectByIds(Arrays.asList(designDocIds));
         StringBuffer designDocBuffer=new StringBuffer();
         StringBuffer codingRuleDocBuffer=new StringBuffer();
         StringBuffer projectDocBuffer=new StringBuffer();
@@ -152,11 +214,13 @@ public class CodingAgentController {
             }
         });
 
-        Map templateContentMap=Map.of("coding_rules",codingRuleDocBuffer.toString(),
-                "design_docs",designDocBuffer.toString(),
-                "demand_docs",demandDocBuffer.toString(),
-                "project_docs",projectDocBuffer.toString()
-        );
+        Map templateContentMap=new HashMap();
+
+        templateContentMap.put("coding_rules",codingRuleDocBuffer.toString());
+        templateContentMap.put("design_docs",designDocBuffer.toString());
+        templateContentMap.put("demand_docs",demandDocBuffer.toString());
+        templateContentMap.put("project_docs",projectDocBuffer.toString());
+
         String finalContent=systemPromptTemplate.create(templateContentMap).getContents();
         String text="";
         return  chatClient
