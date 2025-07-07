@@ -79,8 +79,10 @@ spring:
     #base-url: http://localhost:11434
     #          model: nomic-embed-text:latest
     dashscope:
-      api-key: sk-1e89eafc794343dbbd1ccd07d1f5d338
-#      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      # sk-5b2e76ac7cbf483095543c7831d89c94
+      #
+      api-key: sk-45da0f0c3cb94953beb8e8b296b37543
+      #      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
       chat:
         options:
           model: qwen3-32b
@@ -89,7 +91,7 @@ spring:
           #是否允许联网查询
 
       embedding:
-        api-key: sk-1e89eafc794343dbbd1ccd07d1f5d338
+        api-key: sk-45da0f0c3cb94953beb8e8b296b37543
         options:
           model: text-embedding-v3
           dimensions: 1024

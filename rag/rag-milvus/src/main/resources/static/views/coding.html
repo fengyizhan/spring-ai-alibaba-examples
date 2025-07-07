@@ -7,39 +7,65 @@
     <script src="/js/bootstrap.bundle.min.js"></script>
     <script src="/js/bootstrap-select.min.js"></script>
     <!-- 引入 layui.css -->
-    <link rel="stylesheet" href="//unpkg.com/layui@2.6.8/dist/css/layui.css">
+    <link rel="stylesheet" href="//unpkg.com/layui@2.6.8/dist/css/layui.css"/>
     <!-- 引入 layui.js -->
-    <script src="//unpkg.com/layui@2.6.8/dist/layui.js">
-    <script defer>
+    <script src="//unpkg.com/layui@2.6.8/dist/layui.js"></script>
+    <script>
+
+        let eventSourceChat;
+
         let eventSource;
 
         function appendMessage(position, msg, cls) {
             // msg=msg.replace(/\n/g, "<br>"); // 换行需要转换为前端识别的换行符
             var targetBox=$('#'+position);
             targetBox.append(`<div class="${cls}">${msg}</div>`);
-            targetBox.scrollTop(targetBox.scrollHeight);
+            targetBox.scrollTop(targetBox.height());
         }
 
         function sendMessage() {
 
             var selectDemandDocsIds=$('#selectDemandDocs').val();
+            if(selectDemandDocsIds.length==0)
+            {
+                alert('请选择需求文档！');
+                return;
+            }
             var selectDesignDocsIds=$('#selectDesignDocs').val();
+            if(selectDemandDocsIds.length==0)
+            {
+                alert('请选择设计文档！');
+                return;
+            }
+            var codeMap=window.selectSourceCode;
+            if(codeMap.size==0)
+            {
+                alert('请选择参考代码！');
+                return;
+            }
 
-
-            const params = new URLSearchParams({
+            var postObject={
                 userId: '1',
-                selectDemandDocsIds: selectDemandDocsIds,
-                selectDesignDocsIds: selectDesignDocsIds
+                demandDocIds: selectDemandDocsIds.join(","),
+                designDocIds: selectDesignDocsIds.join(",")
+            };
+            var codePaths=[];
+            codeMap.forEach((value, key) => {
+                codePaths.push(value);
             });
-
-            const message = $('#messageInput').val().trim();
-            if (!message) return;
+            var codeSources="";
+            const params = new URLSearchParams(postObject);
+            if(codePaths.length>0)
+            {
+                codeSources=codePaths.join(",");
+                params.append("codeSources",codeSources);
+            }
+            const message = "";
 
             // 关闭之前的连接
             if (eventSource) eventSource.close();
 
             appendMessage('chatBox',message, 'user-msg');
-            $('#messageInput').val('');
 
             // 建立SSE连接
             eventSource = new EventSource(`/coding/agent/generate?${params}`);
@@ -68,7 +94,7 @@
                 if (lastDiv.length === 0) {
                     appendMessage(targetBox,contentStr, setClass);
                 } else {
-                    lastDiv.html(lastDiv.html() + contentStr);
+                    lastDiv.text(lastDiv.text() + contentStr);
                 }
             };
 
@@ -76,6 +102,76 @@
                 eventSource.close();
             };
         }
+        function clearMessage()
+        {
+            $(".ai-msg").text("");
+        }
+        function stopMessage()
+        {
+            // 关闭之前的连接
+            if (eventSource) eventSource.close();
+        }
+
+        function sendChatMessage(msg) {
+
+
+            const message = $('#messageChat').val().trim();
+            var postObject={
+                userId: '1'
+            };
+            if(!msg)
+            {//如果没有自定义命令，校验输入文本
+                if (!message) return;
+                postObject.input=message;
+            }else
+            {//否则，只能输入特定命令
+                postObject.input=msg;
+            }
+
+            const params = new URLSearchParams(postObject);
+            // 关闭之前的连接
+            if (eventSourceChat) eventSourceChat.close();
+
+            appendMessage('chatBox',message, 'user-msg');
+            $('#messageChat').val('');
+
+            // 建立SSE连接
+            eventSourceChat = new EventSource(`/coding/agent/step-chat?${params}`);
+
+            eventSourceChat.onmessage = (e) => {
+                const lastDiv = $('#chatBox .ai-msg:last');
+                var eventObj=JSON.parse(e.data);
+                var eventText=eventObj.text;
+                var thinkText=eventObj.metadata.reasoningContent;
+                var setClass='ai-msg';
+                var contentStr='';
+                var targetBox='chatBox';
+                if(thinkText && thinkText.length>0)
+                {//思考阶段
+                    setClass='think-msg';
+                    contentStr=thinkText;
+                    targetBox='thinkBox';
+                }
+                if(eventText && eventText.length>0)
+                {//回答阶段
+                    setClass='ai-msg';
+                    contentStr=eventText;
+                    targetBox='chatBox';
+                }
+
+                if (lastDiv.length === 0) {
+                    appendMessage(targetBox,contentStr, setClass);
+                } else {
+                    lastDiv.text(lastDiv.text() + contentStr);
+                }
+            };
+
+            eventSourceChat.onerror = (e) => {
+                eventSourceChat.close();
+            };
+        }
+
+
     </script>
     <script src="/js/coding.js"></script>
     <style>
@@ -90,7 +186,7 @@
             border:1px solid darkslategray;
             width: 100%;
             overflow: scroll;
-            height: 90%;
+            height: 100vh;
 
             overflow-y: auto;
             padding: 10px;
@@ -101,10 +197,26 @@
             width:100%;
             border: 1px solid darkslategray;
         }
+        #messageChat
+        {
+            margin-top:5px;
+            width:100%;
+            border: 1px solid darkslategray;
+        }
         .chat_but
         {
             background-color: lightskyblue;
             color:darkslategray;
+            padding: 3px;
+            margin:3px;
+
+        }
+        .chat_but_right
+        {
+            background-color: lightsalmon;
+            color:darkslategray;
+            float: right;
+            padding: 3px;
         }
         #thinkBox
         {
@@ -115,6 +227,7 @@
             height: 300px;
             padding: 10px;
             overflow-y: auto;
+            display: none;
         }
         .user-msg { white-space: pre-wrap;color: blue; margin: 5px 0; }
         .ai-msg { white-space: pre-wrap;color: green; margin: 5px 0; }
@@ -158,10 +271,11 @@
         }
         .leftArea
         {
-            width: 350px;
+            width: 500px;
             height: 100vh;
             background-color: #e7f1ff;
             overflow: scroll;
+            border:1px dashed #01AAED;
         }
         .rightArea
         {
@@ -177,7 +291,7 @@
         .tree-icon { margin-right: 5px; }
         .folder { color: #ffb800; }
         .file { color: #5fb878; }
-        .layui-tree-txt{font-size:10px;}
+        #codeTree .layui-tree-txt{font-size:18px;}
         /* 文件夹样式 */
         #codeTree .folder-node .layui-tree-txt {
             color: #09c;
@@ -198,8 +312,14 @@
         #codeTree
         {
             width: 100%;
-            border:1px dashed #000000;
-            height:100vh;
+            min-height:100vh;
+            height: auto;
+        }
+        #codeTree .layui-tree-entry {
+            position: relative;
+            padding: 6px 0;
+            height: 24px;
+            white-space: nowrap;
         }
     </style>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -237,8 +357,19 @@
         <div id="thinkBox"></div>
         <div id="chatBox"></div>
         <div class="bottomArea">
-            <textarea id="messageInput"></textarea>
-            <button onclick="sendMessage()" class="chat_but">发送</button>
+            <button onclick="sendMessage()" class="chat_but" style="color:#51585e;font-weight: bold; ">生成计划</button>
+            <button onclick="sendChatMessage('先生成第一层adapter[适配器层]相关代码，该层的代码生成完整后，停止继续生成其他层代码，供用户确认代码是否正确')" class="chat_but" style="color:#28a745;font-weight: bold; ">适配器层</button>
+            <button onclick="sendChatMessage('接着生成第二层domain[领域服务及其实现类]相关代码，该层的代码生成完整后，停止继续生成其他层代码，供用户确认代码是否正确')" class="chat_but" style="color:#f56c6c;font-weight: bold; ">领域层</button>
+            <button onclick="sendChatMessage('接着生成第三层infra[Mapper层及其Service]相关代码，该层的代码生成完整后，停止继续生成其他层代码，供用户确认代码是否正确')" class="chat_but" style="color:#e6dbb9;font-weight: bold; ">基础设施层</button>
+            <button onclick="sendChatMessage('接着生成其他上述代码引用但没有生成的工具类代码，pom依赖片段，配置文件片段等，供用户确认')" class="chat_but" style="color:#FFB800;font-weight: bold; ">工具类和配置等</button>
+            <button onclick="clearMessage()" class="chat_but">清空</button>
+            <button onclick="stopMessage()" class="chat_but">停止生成</button>
+            <textarea id="messageChat"></textarea>
+            <button onclick="sendChatMessage()" class="chat_but">对话--微调</button>
+            <button onclick="sendChatMessage('继续生成其他代码文件')" class="chat_but">继续生成</button>
+
+            <button style="background-color: #20c997 " onclick="sendChatMessage('总结上述已生成文件的架构蓝图和路径')" class="chat_but_right">文件汇总</button>
+            <button onclick="sendChatMessage('检查上下文生成或补全的代码中使用的新工具类或三方包，返回需要修改的pom文件片段，生成工具类的代码，并且修改使用新工具类和三方包的Class文件完整内容（补全该类缺失的import声明）')" class="chat_but_right">类依赖检测</button>
         </div>
     </div>
 

@@ -22,7 +22,7 @@ public  class MarkdownProcessor {
     {
         List<Extension> extensions = List.of(StrikethroughExtension.create(),TablesExtension.create());
         parser = Parser.builder().extensions(extensions).build();
-        renderer = HtmlRenderer.builder().build();
+        renderer = HtmlRenderer.builder().extensions(extensions).build();
     }
     /**
      * 把文件内容转为markdown内容字符串

@@ -61,16 +61,15 @@ $(function ()
                 elem: '#codeTree',
                 data: fileData,
                 showCheckbox: true,
-                id: 'demoTree',
                 // 自定义节点模板
-                template: function(item) {
+                templet: function(item) {
                     // 返回HTML字符串
-                    return `<span class="${item.type === 'file' ? 'leaf-node-bold' : 'folder-node'}">
+                    return `<div class='custom-node'><span class="${item.type === 'file' ? 'leaf-node-bold' : 'folder-node'}">
         <i class="layui-icon ${
                         item.type === 'folder' ? 'layui-icon-layer' : 'layui-icon-file'
                     }"></i>
         ${item.title}
-      </span>`;
+      </span></div>`;
                 }
                 ,
                 oncheck: function(obj){

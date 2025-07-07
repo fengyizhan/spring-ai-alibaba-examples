@@ -211,9 +211,10 @@ public class VectorController {
                 // 构造SSE（ServerSendEvent）格式返回结果
                 .chatResponse()
                 .map(chatResponse -> {
-                    var result=chatResponse.getResult().getOutput().getText();
+                    var str=JSON.toJSONString(chatResponse.getResult().getOutput());
                     //{"$ref":"$.media"}
                     // 手动转义正则中的特殊字符
+                    String result = str.replaceAll("\\{\\\"\\$ref\\\"\\:\\\"\\$\\.media\\\"\\}", "");
                     log.info("str=="+result);
                     return ServerSentEvent.builder(
                                     result

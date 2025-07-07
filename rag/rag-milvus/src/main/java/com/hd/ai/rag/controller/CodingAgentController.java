@@ -1,5 +1,6 @@
 package com.hd.ai.rag.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.hd.ai.rag.common.TreeNode;
 import com.hd.ai.rag.entity.DemandDocument;
 import com.hd.ai.rag.entity.DesignDocument;
@@ -8,18 +9,22 @@ import com.hd.ai.rag.service.DesignDocService;
 import com.hd.ai.rag.tools.TickTool;
 import com.hd.ai.rag.tools.TimeTool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +45,7 @@ import java.util.*;
 public class CodingAgentController {
 
     private final ChatClient chatClient;
+    private final ChatClient chatClientCoder;
     private final ChatClient mcpClient;
     private final ChatMemory chatMemory;
     @Autowired
@@ -52,15 +58,16 @@ public class CodingAgentController {
 
     @Value("classpath:/template/coding.txt")
     private Resource codingResource;
+
+    @Value("classpath:/template/stepCoding.txt")
+    private Resource stepCodingResource;
+
     public CodingAgentController(ChatClient.Builder builder, @Qualifier("mcpChatModel") ChatModel mcpChatModel) {
         this.chatMemory = new InMemoryChatMemory();
         MessageChatMemoryAdvisor mma = new MessageChatMemoryAdvisor(chatMemory);
-        this.chatClient = builder
-                .defaultAdvisors(mma)
-                .build();
-        this.mcpClient = ChatClient.builder(mcpChatModel)
-                .defaultAdvisors(mma)
-                .build();
+        this.chatClient = builder.defaultAdvisors(mma).build();
+        this.chatClientCoder=builder.defaultAdvisors(mma).build();
+        this.mcpClient = ChatClient.builder(mcpChatModel).defaultAdvisors(mma).build();
 
     }
 
@@ -179,21 +186,23 @@ public class CodingAgentController {
     }
 
 
-    @GetMapping(value = "/generate")
-    public Flux<ServerSentEvent<String>> generate(@RequestParam String userId, @RequestParam String[] demandDocIds, @RequestParam String[] designDocIds) {
+    @GetMapping(value = "/generate", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> generate(@RequestParam String userId, @RequestParam String demandDocIds, @RequestParam String designDocIds,@RequestParam String codeSources) {
 
         String codingTemplate = null;
+        String stepCodingTemplate = null;
         try {
             codingTemplate = codingResource.getContentAsString(StandardCharsets.UTF_8);
+            stepCodingTemplate = stepCodingResource.getContentAsString(StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         SystemPromptTemplate systemPromptTemplate=new SystemPromptTemplate(codingTemplate);
-        List<DemandDocument> demandDocuments=demandDocService.getBaseMapper().selectByIds(Arrays.asList(demandDocIds));
+        List<DemandDocument> demandDocuments=demandDocService.getBaseMapper().selectByIds(Arrays.asList(demandDocIds.split(",")));
         StringBuffer demandDocBuffer=new StringBuffer();
         //需求文档
         demandDocuments.forEach(demandDocument -> { demandDocBuffer.append(demandDocument.getContent()); });
-        List<DesignDocument> designDocuments=designDocService.getBaseMapper().selectByIds(Arrays.asList(designDocIds));
+        List<DesignDocument> designDocuments=designDocService.getBaseMapper().selectByIds(Arrays.asList(designDocIds.split(",")));
         StringBuffer designDocBuffer=new StringBuffer();
         StringBuffer codingRuleDocBuffer=new StringBuffer();
         StringBuffer projectDocBuffer=new StringBuffer();
@@ -213,71 +222,85 @@ public class CodingAgentController {
                 projectDocBuffer.append(designDocument.getContent());
             }
         });
+        StringBuffer codingSourceBuffer=new StringBuffer();
+        if(codeSources!=null)
+        {
+            String[] codeFilePath=codeSources.split(",");
+            for(String codeFilePathStr:codeFilePath)
+            {
+                String codeStringContent= null;
+                try {
+                    codeStringContent = FileUtils.readFileToString(new File(codeFilePathStr), StandardCharsets.UTF_8)+"\n";
+                    if(StringUtils.isNotBlank(codeStringContent))
+                    {
+                        codingSourceBuffer.append(codeStringContent);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
 
         Map templateContentMap=new HashMap();
 
         templateContentMap.put("coding_rules",codingRuleDocBuffer.toString());
         templateContentMap.put("design_docs",designDocBuffer.toString());
-        templateContentMap.put("demand_docs",demandDocBuffer.toString());
         templateContentMap.put("project_docs",projectDocBuffer.toString());
+        templateContentMap.put("demand_docs",demandDocBuffer.toString());
+        templateContentMap.put("source_codes",codingSourceBuffer.toString());
 
         String finalContent=systemPromptTemplate.create(templateContentMap).getContents();
-        String text="";
         return  chatClient
                 .prompt()
-                .messages(new SystemMessage(finalContent))
+                .messages(new UserMessage(finalContent))
                 .advisors(spec -> spec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
                         // 继续在 Lambda 表达式中调用 .param 方法，设置聊天记忆的检索大小为 100
                         .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10000))
                 .stream()
                 // 构造SSE（ServerSendEvent）格式返回结果
                 .chatResponse()
-                        .map(chatResponse ->
-                        {
-                            String result= chatResponse.getResult().getOutput().getText();
-                            log.info("out=="+result);
-                            return ServerSentEvent.builder(
-                                            result
-                                    )
-                                    .event("message").build();
-                        });
+                .map(chatResponse -> {
+                    var str= JSON.toJSONString(chatResponse.getResult().getOutput());
+                    //{"$ref":"$.media"}
+                    // 手动转义正则中的特殊字符
+                    String result = str.replaceAll("\\{\\\"\\$ref\\\"\\:\\\"\\$\\.media\\\"\\}", "");
+                    log.info("str=="+result);
+                    return ServerSentEvent.builder(
+                                    result
+                            )
+                            .event("message").build();
+                });
     }
 
 
 
 
-
-    @GetMapping(value = "/chat")
-    public String chat(@RequestParam String userId,  @RequestParam String input,@RequestParam Boolean useTools) {
-
-        log.info("/chat   input:  [{}]", input);
-        String text="";
-        if(useTools)
-        {//如果使用工具，那么调用大模型时要动态设置请求模型参数
-            text =  mcpClient
-                    .prompt()
-                    .user(input)
-                    .advisors(spec -> spec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
-                            // 继续在 Lambda 表达式中调用 .param 方法，设置聊天记忆的检索大小为 100
-                            .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
-                    .tools(new TimeTool(),new TickTool())
-                    .call()
-                    .content();
-            log.info("toolcall text --> [{}]", text);
-        }
-        else
-        {
-            text =  chatClient
-                    .prompt()
-                    .user(input)
-                    .advisors(spec -> spec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
-                            // 继续在 Lambda 表达式中调用 .param 方法，设置聊天记忆的检索大小为 100
-                            .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
-                    .call()
-                    .content();
-            log.info("common text --> [{}]", text);
-        }
-        return text;
+    @GetMapping(value = "/step-chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> stepChat(@RequestParam String userId,@RequestParam String input) {
+        return  chatClientCoder
+                .prompt()
+                .messages(
+                        new UserMessage(input)
+                )
+                .advisors(spec -> spec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
+                        // 继续在 Lambda 表达式中调用 .param 方法，设置聊天记忆的检索大小为 100
+                        .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10000))
+                .stream()
+                // 构造SSE（ServerSendEvent）格式返回结果
+                .chatResponse()
+                .map(chatResponse -> {
+                    var str= JSON.toJSONString(chatResponse.getResult().getOutput());
+                    //{"$ref":"$.media"}
+                    // 手动转义正则中的特殊字符
+                    String result = str.replaceAll("\\{\\\"\\$ref\\\"\\:\\\"\\$\\.media\\\"\\}", "");
+                    log.info("str=="+result);
+                    return ServerSentEvent.builder(
+                                    result
+                            )
+                            .event("message").build();
+                });
     }
+
+
 
 }
