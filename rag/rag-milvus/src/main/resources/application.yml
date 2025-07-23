@@ -46,7 +46,13 @@ spring:
     cors:
       allowed-origins: '*'
       allowed-methods: 'GET,POST'
-
+  restTemplate:
+    httpclient:
+      maxTotal: 500
+      maxConnectPerRoute: 50
+      keepAliveTime: 600000  # 长连接保活时间(ms)
+      enableRetry: true      # 开启重试
+      retryTimes: 3          # 重试次数
 
   main:
     allow-bean-definition-overriding: true
@@ -58,6 +64,12 @@ spring:
       port: 16379
       password: huadingyun
       database: 0
+      lettuce:
+        pool:
+          max-active: 200      # 最大连接数
+          max-idle: 20        # 最大空闲连接
+          min-idle: 20         # 最小空闲连接
+          max-wait: 2000ms    # 获取连接最大等待时间
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -82,6 +94,12 @@ spring:
       # sk-5b2e76ac7cbf483095543c7831d89c94
       #
       api-key: sk-45da0f0c3cb94953beb8e8b296b37543
+      connection-pool-size: 2000
+      maximum-async-requests: 2000
+      rest-client:
+        max-connections: 500  # 最大连接数‌
+        connection-timeout: 5000ms
+
       #      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
       chat:
         options:
@@ -89,11 +107,16 @@ spring:
           #128k长上下文的推理模型
 #          enable-search: true
           #是否允许联网查询
+            # 连接池关键参数
+      pool:
+        max-total: 500  # 全局最大连接数，根据QPS×平均响应时间计算‌
+        default-max-per-route: 50  # 单路由并发限制，避免资源争抢‌
+        validate-after-inactivity: 30000  # 空闲验证间隔(ms)，默认2秒过短，建议30秒‌
 
       embedding:
         api-key: sk-45da0f0c3cb94953beb8e8b296b37543
         options:
-          model: text-embedding-v3
+          model: text-embedding-v4
           dimensions: 1024
 
     # 向量存储器配置
@@ -131,4 +154,7 @@ milvus:
 
 workspace:
   root: D:\workspace\hdy-erp
+  chatHistory: 10000
+
+
 

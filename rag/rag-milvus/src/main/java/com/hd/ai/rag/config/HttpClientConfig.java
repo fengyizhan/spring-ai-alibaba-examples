@@ -34,17 +34,17 @@ public class HttpClientConfig {
     @Value("${http_default_max_perRoute:80}")
     private int defaultMaxPerRoute = 80;
 
-    @Value("${http_validate_after_inactivity:1000}")
-    private int validateAfterInactivity = 1000;
+    @Value("${http_validate_after_inactivity:5000}")
+    private int validateAfterInactivity = 5000;
 
-    @Value("${http_connection_request_timeout:5000}")
-    private int connectionRequestTimeout = 5000;
+    @Value("${http_connection_request_timeout:50000}")
+    private int connectionRequestTimeout = 50000;
 
     @Value("${http_connection_timeout:5000}")
     private int connectTimeout = 5000;
 
-    @Value("${http_socket_timeout:30000}")
-    private int socketTimeout = 30000;
+    @Value("${http_socket_timeout:300000}")
+    private int socketTimeout = 300000;
 
     @Value("${waitTime:30000}")
     private int waitTime = 30000;
@@ -86,7 +86,7 @@ public class HttpClientConfig {
                         return Long.parseLong(value) * 1000;
                     }
                 }
-                return 30 * 1000;
+                return 300 * 1000;
             }
         });
         httpClientBuilder.setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount, false));
@@ -122,7 +122,7 @@ public class HttpClientConfig {
     @Bean
     public IdleConnectionEvictor createIdleConnectionEvictor(PoolingHttpClientConnectionManager poolManager) {
 
-        IdleConnectionEvictor idleConnectionEvictor = new IdleConnectionEvictor(poolManager, idleConTime, TimeUnit.SECONDS);
+        IdleConnectionEvictor idleConnectionEvictor = new IdleConnectionEvictor(poolManager, idleConTime, TimeUnit.MINUTES);
         return idleConnectionEvictor;
     }
 }

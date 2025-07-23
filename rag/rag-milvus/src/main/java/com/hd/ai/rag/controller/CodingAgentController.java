@@ -2,12 +2,11 @@ package com.hd.ai.rag.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.hd.ai.rag.common.TreeNode;
+import com.hd.ai.rag.config.ChatHistoryService;
 import com.hd.ai.rag.entity.DemandDocument;
 import com.hd.ai.rag.entity.DesignDocument;
 import com.hd.ai.rag.service.DemandDocService;
 import com.hd.ai.rag.service.DesignDocService;
-import com.hd.ai.rag.tools.TickTool;
-import com.hd.ai.rag.tools.TimeTool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,8 +14,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemory;
-import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
@@ -56,15 +53,21 @@ public class CodingAgentController {
     @Value("${workspace.root}")
     private String workspaceDir;
 
+    @Value("${workspace.chatHistory}")
+    private Long chatHistorySize;
+
     @Value("classpath:/template/coding.txt")
     private Resource codingResource;
 
     @Value("classpath:/template/stepCoding.txt")
     private Resource stepCodingResource;
 
-    public CodingAgentController(ChatClient.Builder builder, @Qualifier("mcpChatModel") ChatModel mcpChatModel) {
-        this.chatMemory = new InMemoryChatMemory();
-        MessageChatMemoryAdvisor mma = new MessageChatMemoryAdvisor(chatMemory);
+    @Autowired
+    private ChatHistoryService chatHistoryService;
+
+    public CodingAgentController(ChatClient.Builder builder, @Qualifier("mcpChatModel") ChatModel mcpChatModel,ChatMemory redisChatMemory) {
+        this.chatMemory = redisChatMemory;
+        MessageChatMemoryAdvisor mma = new MessageChatMemoryAdvisor(redisChatMemory);
         this.chatClient = builder.defaultAdvisors(mma).build();
         this.chatClientCoder=builder.defaultAdvisors(mma).build();
         this.mcpClient = ChatClient.builder(mcpChatModel).defaultAdvisors(mma).build();
@@ -181,6 +184,7 @@ public class CodingAgentController {
      */
     @GetMapping("/clearSession")
     public ResponseEntity clearSession(@RequestParam String userId) {
+        chatHistoryService.deleteConversation(userId);
         chatMemory.clear(userId); // 清空内存中的对话记录
         return ResponseEntity.ok().build();
     }
@@ -255,7 +259,7 @@ public class CodingAgentController {
                 .messages(new UserMessage(finalContent))
                 .advisors(spec -> spec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
                         // 继续在 Lambda 表达式中调用 .param 方法，设置聊天记忆的检索大小为 100
-                        .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10000))
+                        .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, chatHistorySize))
                 .stream()
                 // 构造SSE（ServerSendEvent）格式返回结果
                 .chatResponse()
@@ -284,7 +288,7 @@ public class CodingAgentController {
                 )
                 .advisors(spec -> spec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
                         // 继续在 Lambda 表达式中调用 .param 方法，设置聊天记忆的检索大小为 100
-                        .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10000))
+                        .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, chatHistorySize))
                 .stream()
                 // 构造SSE（ServerSendEvent）格式返回结果
                 .chatResponse()

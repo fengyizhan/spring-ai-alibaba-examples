@@ -43,9 +43,14 @@
                 alert('请选择参考代码！');
                 return;
             }
-
+            var currentUserId=$("#userSessionId").val();
+            if(currentUserId.trim()=='')
+            {
+                alert('请输入手机号作为用户编号！');
+                return;
+            }
             var postObject={
-                userId: '1',
+                userId: currentUserId,
                 demandDocIds: selectDemandDocsIds.join(","),
                 designDocIds: selectDesignDocsIds.join(",")
             };
@@ -116,8 +121,14 @@
 
 
             const message = $('#messageChat').val().trim();
+            var currentUserId=$("#userSessionId").val();
+            if(currentUserId.trim()=='')
+            {
+                alert('请输入手机号作为用户编号！');
+                return;
+            }
             var postObject={
-                userId: '1'
+                userId: currentUserId
             };
             if(!msg)
             {//如果没有自定义命令，校验输入文本
@@ -190,6 +201,8 @@
 
             overflow-y: auto;
             padding: 10px;
+            display: flex;
+            flex-direction: column-reverse;
         }
         #messageInput
         {
@@ -228,6 +241,7 @@
             padding: 10px;
             overflow-y: auto;
             display: none;
+            flex-direction: column-reverse;
         }
         .user-msg { white-space: pre-wrap;color: blue; margin: 5px 0; }
         .ai-msg { white-space: pre-wrap;color: green; margin: 5px 0; }
@@ -345,6 +359,10 @@
             <label for="selectDesignDocs">设计文档</label>
             <select class="selectpicker" multiple data-live-search="true" id="selectDesignDocs">
             </select>
+        </div>
+        <div class="query-item">
+            <label for="userSessionId">用户会话</label>
+            <input id="userSessionId" value="1"/>
         </div>
     </div>
 </div>
