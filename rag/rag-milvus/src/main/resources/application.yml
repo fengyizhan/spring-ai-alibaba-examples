@@ -154,7 +154,7 @@ milvus:
 
 workspace:
   root: D:\workspace\hdy-erp
-  chatHistory: 10000
+  chatHistory: 1000
 
 
 
