@@ -20,6 +20,7 @@ import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.retry.RetryUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -30,6 +31,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.net.ssl.SSLContext;
+
+import static java.lang.System.getenv;
 
 @Configuration
 public class ChatConfiguration {
@@ -70,9 +73,9 @@ public class ChatConfiguration {
 
     @Primary
     @Bean("chatModel")
-    public DashScopeChatModel chatModel()
+    public DashScopeChatModel chatModel(RestClient.Builder restClientBuilder,WebClient.Builder webClientBuilder)
     {
-        DashScopeApi dashScopeApi = new DashScopeApi(System.getenv("DASHSCOPE_API_KEY"));
+        DashScopeApi dashScopeApi=new DashScopeApi("https://dashscope.aliyuncs.com", System.getenv("DASHSCOPE_API_KEY"), restClientBuilder, webClientBuilder, RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER);
         DashScopeChatModel chatModel = new DashScopeChatModel(dashScopeApi,
                 DashScopeChatOptions.builder()
                         .withModel(
@@ -172,7 +175,7 @@ public class ChatConfiguration {
     }
 
     @Bean
-    public WebClient webClient(CloseableHttpAsyncClient asyncHttpClient) {
+    public WebClient.Builder webClient(CloseableHttpAsyncClient asyncHttpClient) {
         // 启动异步HttpClient
         asyncHttpClient.start();
 
@@ -182,13 +185,12 @@ public class ChatConfiguration {
 
         return WebClient.builder()
                 .clientConnector(connector)
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
-                .build();
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024));
     }
 
 
     @Bean
-    public RestClient restClient(HttpClientConnectionManager connectionManager) {
+    public RestClient.Builder restClient(RestTemplate restTemplate,HttpClientConnectionManager connectionManager) {
 
         // 1. 构建同步HttpClient
         HttpClient httpClient = HttpClients.custom()
@@ -200,9 +202,8 @@ public class ChatConfiguration {
         requestFactory.setConnectTimeout(3000);
         requestFactory.setReadTimeout(60000);
 
-        return RestClient.builder()
-                .requestFactory(requestFactory)
-                .build();
+        return RestClient.builder(restTemplate)
+                .requestFactory(requestFactory);
     }
 
     
