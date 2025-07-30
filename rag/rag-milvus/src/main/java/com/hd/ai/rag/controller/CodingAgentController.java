@@ -190,7 +190,7 @@ public class CodingAgentController {
     }
 
 
-    @GetMapping(value = "/generate", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/generate", produces = "text/event-stream;charset=UTF-8")
     public Flux<ServerSentEvent<String>> generate(@RequestParam String userId, @RequestParam String demandDocIds, @RequestParam String designDocIds,@RequestParam String codeSources) {
 
         String codingTemplate = null;
@@ -279,7 +279,7 @@ public class CodingAgentController {
 
 
 
-    @GetMapping(value = "/step-chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/step-chat", produces = "text/event-stream;charset=UTF-8")
     public Flux<ServerSentEvent<String>> stepChat(@RequestParam String userId,@RequestParam String input) {
         return  chatClientCoder
                 .prompt()
