@@ -24,10 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import reactor.core.publisher.Flux;
 
@@ -182,7 +179,7 @@ public class CodingAgentController {
      * @param userId 用户标识
      * @return 操作结果
      */
-    @GetMapping("/clearSession")
+    @PostMapping("/clearSession")
     public ResponseEntity clearSession(@RequestParam String userId) {
         chatHistoryService.deleteConversation(userId);
         chatMemory.clear(userId); // 清空内存中的对话记录

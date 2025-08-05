@@ -22,7 +22,6 @@
             targetBox.append(`<div class="${cls}">${msg}</div>`);
             targetBox.scrollTop(targetBox.height());
         }
-
         function sendMessage() {
 
             var selectDemandDocsIds=$('#selectDemandDocs').val();
@@ -118,6 +117,8 @@
         {
             // 关闭之前的连接
             if (eventSource) eventSource.close();
+            // 关闭之前的连接
+            if (eventSourceChat) eventSourceChat.close();
         }
 
         function sendChatMessage(msg) {
@@ -235,6 +236,11 @@
         {
             background-color: lightsalmon;
             color:darkslategray;
+            float: right;
+            padding: 3px;
+        }
+        .but_right
+        {
             float: right;
             padding: 3px;
         }
@@ -370,6 +376,7 @@
         <div class="query-item">
             <label for="userSessionId">用户会话</label>
             <input id="userSessionId" value="1"/>
+            <button onclick="clearUserSession()" class="chat_but" style="color:#517281;font-weight: bold;background-color: #0df09e;border: 2px dashed #409eff; ">清除会话（开启新会话）</button>
         </div>
     </div>
 </div>
@@ -382,19 +389,18 @@
         <div id="thinkBox"></div>
         <div id="chatBox"></div>
         <div class="bottomArea">
-            <button onclick="sendMessage()" class="chat_but" style="color:#51585e;font-weight: bold; ">生成计划</button>
-            <button onclick="sendChatMessage('先生成第一层adapter[适配器层]相关代码，该层的代码生成完整后，停止继续生成其他层代码，供用户确认代码是否正确')" class="chat_but" style="color:#28a745;font-weight: bold; ">适配器层</button>
-            <button onclick="sendChatMessage('接着生成第二层domain[领域服务及其实现类]相关代码，该层的代码生成完整后，停止继续生成其他层代码，供用户确认代码是否正确')" class="chat_but" style="color:#f56c6c;font-weight: bold; ">领域层</button>
-            <button onclick="sendChatMessage('接着生成第三层infra[Mapper层及其Service]相关代码，该层的代码生成完整后，停止继续生成其他层代码，供用户确认代码是否正确')" class="chat_but" style="color:#e6dbb9;font-weight: bold; ">基础设施层</button>
-            <button onclick="sendChatMessage('接着生成其他上述代码引用但没有生成的工具类代码，pom依赖片段，配置文件片段等，供用户确认')" class="chat_but" style="color:#FFB800;font-weight: bold; ">工具类和配置等</button>
-            <button onclick="clearMessage()" class="chat_but">清空</button>
-            <button onclick="stopMessage()" class="chat_but">停止生成</button>
+            <button onclick="sendMessage()" class="chat_but" style="color:#51585e;font-weight: bold; ">预览生成计划</button>
+            <button onclick="sendChatMessage('先生成第一层adapter[适配器层]相关代码，该层的代码生成完整后，停止继续生成其他层代码，供用户确认代码是否正确')" class="chat_but" style="color:#28a745;font-weight: bold;border:2px dashed #51585e;">Adapter：适配器层</button>
+            <button onclick="sendChatMessage('接着生成第二层domain[领域服务及其实现类]相关代码，该层的代码生成完整后，停止继续生成其他层代码，供用户确认代码是否正确')" class="chat_but" style="color:#f56c6c;font-weight: bold;border:2px dashed #51585e; ">Domain：领域层</button>
+            <button onclick="sendChatMessage('接着生成第三层infra[Mapper层及其Service]相关代码，该层的代码生成完整后，停止继续生成其他层代码，供用户确认代码是否正确')" class="chat_but" style="color:#e6dbb9;font-weight: bold;border:2px dashed #51585e; ">Infrastructure：基础设施层</button>
+            <button onclick="sendChatMessage('接着生成其他上述代码引用但没有生成的工具类代码，pom依赖片段，配置文件片段等，供用户确认')" class="chat_but" style="color:#007bff;font-weight: bold; ">Utility And Config：工具类和配置等</button>
+            <button onclick="clearMessage()" class="chat_but but_right">清屏</button>
+            <button onclick="stopMessage()" class="chat_but but_right">停止生成</button>
             <textarea id="messageChat"></textarea>
             <button onclick="sendChatMessage()" class="chat_but">对话--微调</button>
-            <button onclick="sendChatMessage('继续生成其他代码文件')" class="chat_but">继续生成</button>
-
-            <button style="background-color: #20c997 " onclick="sendChatMessage('总结上述已生成文件的架构蓝图和路径')" class="chat_but_right">文件汇总</button>
-            <button onclick="sendChatMessage('检查上下文生成或补全的代码中使用的新工具类或三方包，返回需要修改的pom文件片段，生成工具类的代码，并且修改使用新工具类和三方包的Class文件完整内容（补全该类缺失的import声明）')" class="chat_but_right">类依赖检测</button>
+            <button onclick="sendChatMessage('继续生成其他代码文件')" class="chat_but" style="background-color:#00ffc6;">继续生成 >></button>
+            <button style="background-color:#20c997;" onclick="sendChatMessage('总结上述已生成文件的架构蓝图和路径')" class="chat_but_right">文件汇总</button>
+            <button onclick="sendChatMessage('检查上下文生成或补全的代码中使用的新工具类或三方包，返回需要修改的pom文件片段，生成工具类的代码，并且修改使用新工具类和三方包的Class文件完整内容（补全该类缺失的import声明）')" class="chat_but_right" style="margin-right:5px;">类依赖检测</button>
         </div>
     </div>
 

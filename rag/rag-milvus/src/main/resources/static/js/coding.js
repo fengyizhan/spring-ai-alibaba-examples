@@ -1,3 +1,26 @@
+function clearUserSession()
+{
+    var currentUserId=$("#userSessionId").val();
+    if(currentUserId.trim()=='')
+    {
+        alert('请输入需要清空的用户编号！');
+        return;
+    }
+
+    $.ajax({
+        method: 'POST',
+        url: '/coding/agent/clearSession',
+        data: {userId: currentUserId},
+        success: function(data) {
+            var continued=confirm("清屏并且断开会话吗？");
+            if(continued)
+            {
+                stopMessage();  //断开当前会话
+                clearMessage(); //清屏
+            }
+        }
+    });
+}
 $(function ()
 {
     let codeMap=new Map();
