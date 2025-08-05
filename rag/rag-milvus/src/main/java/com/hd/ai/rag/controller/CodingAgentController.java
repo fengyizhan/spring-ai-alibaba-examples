@@ -7,6 +7,7 @@ import com.hd.ai.rag.entity.DemandDocument;
 import com.hd.ai.rag.entity.DesignDocument;
 import com.hd.ai.rag.service.DemandDocService;
 import com.hd.ai.rag.service.DesignDocService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -191,8 +191,9 @@ public class CodingAgentController {
 
 
     @GetMapping(value = "/generate", produces = "text/event-stream;charset=UTF-8")
-    public Flux<ServerSentEvent<String>> generate(@RequestParam String userId, @RequestParam String demandDocIds, @RequestParam String designDocIds,@RequestParam String codeSources) {
-
+    public Flux<ServerSentEvent<String>> generate(@RequestParam String userId, @RequestParam String demandDocIds, @RequestParam String designDocIds, @RequestParam String codeSources, HttpServletResponse response) {
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/event-stream");
         String codingTemplate = null;
         String stepCodingTemplate = null;
         try {
@@ -280,7 +281,9 @@ public class CodingAgentController {
 
 
     @GetMapping(value = "/step-chat", produces = "text/event-stream;charset=UTF-8")
-    public Flux<ServerSentEvent<String>> stepChat(@RequestParam String userId,@RequestParam String input) {
+    public Flux<ServerSentEvent<String>> stepChat(@RequestParam String userId,@RequestParam String input, HttpServletResponse response) {
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/event-stream");
         return  chatClientCoder
                 .prompt()
                 .messages(

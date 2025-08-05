@@ -76,7 +76,10 @@
             eventSource = new EventSource(`/coding/agent/generate?${params}`);
 
             eventSource.onmessage = (e) => {
-                const lastDiv = $('#chatBox .ai-msg:last');
+                const lastDiv = $('#chatBox .ai-msg:last')
+                // const decoder = new TextDecoder('utf-8');
+                // const jsondata = decoder.decode(new Uint8Array(e.data));
+                // console.log('decode======'+jsondata);
                 var eventObj=JSON.parse(e.data);
                 var eventText=eventObj.text;
                 var thinkText=eventObj.metadata.reasoningContent;
@@ -95,7 +98,7 @@
                     contentStr=eventText;
                     targetBox='chatBox';
                 }
-
+                console.log('eventSource================'+contentStr);
                 if (lastDiv.length === 0) {
                     appendMessage(targetBox,contentStr, setClass);
                 } else {
@@ -151,6 +154,10 @@
 
             eventSourceChat.onmessage = (e) => {
                 const lastDiv = $('#chatBox .ai-msg:last');
+                // const decoder = new TextDecoder('utf-8');
+                // const jsondata = decoder.decode(new Uint8Array(e.data));
+                // console.log('decode======'+jsondata);
+
                 var eventObj=JSON.parse(e.data);
                 var eventText=eventObj.text;
                 var thinkText=eventObj.metadata.reasoningContent;
@@ -169,7 +176,7 @@
                     contentStr=eventText;
                     targetBox='chatBox';
                 }
-
+                console.log('eventSourceChat================'+contentStr);
                 if (lastDiv.length === 0) {
                     appendMessage(targetBox,contentStr, setClass);
                 } else {

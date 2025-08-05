@@ -35,9 +35,10 @@ logging:
 spring:
   http:
     encoding:
+      force: true
       charset: UTF-8
       enabled: true
-      force: true
+      force-response: true
   mvc:
     view:
       prefix: /views/
@@ -49,7 +50,7 @@ spring:
   restTemplate:
     httpclient:
       maxTotal: 500
-      maxConnectPerRoute: 50
+      maxConnectPerRoute: 200
       keepAliveTime: 600000  # 长连接保活时间(ms)
       enableRetry: true      # 开启重试
       retryTimes: 3          # 重试次数
