@@ -1,6 +1,7 @@
 package com.hd.ai.rag;
 
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration;
@@ -16,6 +17,7 @@ import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfigu
         RestTemplateAutoConfiguration.class,   // 排除RestTemplate自动配置
         RestClientAutoConfiguration.class,       //排除RestClient的自动配置
         HttpMessageConvertersAutoConfiguration.class // 排除可能间接依赖的消息转换器配置
+        , MilvusVectorStoreAutoConfiguration.class //暂时屏蔽向量数据库rag等依赖
 })
 public class AiApplication {
 
