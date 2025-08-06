@@ -111,7 +111,7 @@ spring:
             # 连接池关键参数
       pool:
         max-total: 500  # 全局最大连接数，根据QPS×平均响应时间计算‌
-        default-max-per-route: 50  # 单路由并发限制，避免资源争抢‌
+        default-max-per-route: 200  # 单路由并发限制，避免资源争抢‌
         validate-after-inactivity: 30000  # 空闲验证间隔(ms)，默认2秒过短，建议30秒‌
 
       embedding:
@@ -121,20 +121,20 @@ spring:
           dimensions: 1024
 
     # 向量存储器配置
-    vectorstore:
-      milvus:
-        client:
-          host: ${MILVUS_HOST:localhost} # default: localhost
-          port: ${MILVUS_PORT:19530} # default: 19530
-          username: ${MILVUS_USERNAME:huading} # default: root
-          password: ${MILVUS_PASSWORD:hdadmin} # default: milvus
-        databaseName: ${MILVUS_DATABASE_NAME:test} # default: default
-        collectionName: ${MILVUS_COLLECTION_NAME:vector_store} # default: vector_store
-        embeddingDimension: 1024 # default: 1536 大约2000字content限制
-        indexType: IVF_FLAT # default: IVF_FLAT
-        metricType: COSINE # default: COSINE
-        initialize-schema: true
-        auto-id: false
+#    vectorstore:
+#      milvus:
+#        client:
+#          host: ${MILVUS_HOST:localhost} # default: localhost
+#          port: ${MILVUS_PORT:19530} # default: 19530
+#          username: ${MILVUS_USERNAME:huading} # default: root
+#          password: ${MILVUS_PASSWORD:hdadmin} # default: milvus
+#        databaseName: ${MILVUS_DATABASE_NAME:test} # default: default
+#        collectionName: ${MILVUS_COLLECTION_NAME:vector_store} # default: vector_store
+#        embeddingDimension: 1024 # default: 1536 大约2000字content限制
+#        indexType: IVF_FLAT # default: IVF_FLAT
+#        metricType: COSINE # default: COSINE
+#        initialize-schema: true
+#        auto-id: false
 
 mybatis-plus:
   #  mapper-locations: classpath:/mapper/**/*.xml  # Mapper XML文件位置
@@ -147,11 +147,11 @@ mybatis-plus:
 
 
 
-milvus:
-  host: ${MILVUS_HOST:localhost} # default: localhost
-  port: ${MILVUS_PORT:19530} # default: 19530
-  username: ${MILVUS_USERNAME:huading} # default: root
-  password: ${MILVUS_PASSWORD:hdadmin} # default: milvus
+#milvus:
+#  host: ${MILVUS_HOST:localhost} # default: localhost
+#  port: ${MILVUS_PORT:19530} # default: 19530
+#  username: ${MILVUS_USERNAME:huading} # default: root
+#  password: ${MILVUS_PASSWORD:hdadmin} # default: milvus
 
 workspace:
   root: D:\workspace\hdy-erp
