@@ -8,9 +8,14 @@ import com.hd.ai.rag.entity.DesignDocument;
 import com.hd.ai.rag.service.DemandDocService;
 import com.hd.ai.rag.service.DesignDocService;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.api.CloneCommand;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -28,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import reactor.core.publisher.Flux;
 
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -183,6 +189,41 @@ public class CodingAgentController {
     public ResponseEntity clearSession(@RequestParam String userId) {
         chatHistoryService.deleteConversation(userId);
         chatMemory.clear(userId); // 清空内存中的对话记录
+        return ResponseEntity.ok().build();
+    }
+
+
+
+    /**
+     * 清理并且重新拉取工作空间
+     * @param gitUrl 代码仓库地址
+     * @param gitVersion 代码版本号
+     * @return 操作结果
+     */
+    @SneakyThrows
+    @PostMapping("/pullWorkspace")
+    public ResponseEntity pullWorkspace(@RequestParam @NotNull(message = "代码仓库地址不能为空！") String gitUrl, @RequestParam String gitVersion) {
+        File rootDir = new File(workspaceDir);
+        if (!rootDir.exists() || !rootDir.isDirectory()) {
+            throw new IllegalArgumentException("Invalid directory path");
+        }
+        //删除原来的文件
+        FileUtils.deleteQuietly(rootDir);
+        CloneCommand clone = Git.cloneRepository();
+        clone.setURI(gitUrl);
+        if(StringUtils.isNotEmpty(gitVersion))
+        {
+            clone.setBranch(gitVersion);
+        }
+        clone.setDirectory(rootDir);
+
+        clone.setCredentialsProvider(new UsernamePasswordCredentialsProvider("fengyizhan", "qq19861026"));
+        //拉取最新版本文件
+        try {
+            Git git = clone.call();
+        } catch (GitAPIException e) {
+            throw new Exception("代码拉取过程报错！",e);
+        }
         return ResponseEntity.ok().build();
     }
 

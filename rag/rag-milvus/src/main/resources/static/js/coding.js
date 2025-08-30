@@ -21,6 +21,32 @@ function clearUserSession()
         }
     });
 }
+
+function pullWorkspace()
+{
+    var gitUrl=$("#gitUrl").val();
+    if(gitUrl.trim()=='')
+    {
+        alert('请输入git代码仓库地址！');
+        return;
+    }
+    var gitVersion=$("#gitVersion").val();
+
+    var continued=confirm("清理工作空间且拉取最新代码吗？");
+    if(continued)
+    {
+        $.ajax({
+            method: 'POST',
+            url: '/coding/agent/pullWorkspace',
+            data: {gitUrl: gitUrl,gitVersion: gitVersion},
+            success: function(data) {
+                alert('代码空间重新初始化完毕。');
+                location.reload();
+            }
+        });
+    }
+}
+
 $(function ()
 {
     let codeMap=new Map();

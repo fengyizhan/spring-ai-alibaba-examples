@@ -378,6 +378,13 @@
             <input id="userSessionId" value="1"/>
             <button onclick="clearUserSession()" class="chat_but" style="color:#517281;font-weight: bold;background-color: #0df09e;border: 2px dashed #409eff; ">清除会话（开启新会话）</button>
         </div>
+        <div class="query-item">
+            <label for="gitUrl">git地址</label>
+            <input id="gitUrl" value=""/>
+            <label for="gitVersion">版本号（不填默认master分支）</label>
+            <input id="gitVersion" value=""/>
+            <button onclick="pullWorkspace()" class="chat_but" style="color:#517281;font-weight: bold;background-color: #eccccf;border: 2px dashed #409eff; ">清理工作空间（拉取最新代码）</button>
+        </div>
     </div>
 </div>
 
