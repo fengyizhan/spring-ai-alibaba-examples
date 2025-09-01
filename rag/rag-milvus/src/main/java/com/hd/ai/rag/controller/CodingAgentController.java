@@ -160,7 +160,6 @@ public class CodingAgentController {
     }
 
 
-
     /**
      * 清理并且重新拉取工作空间
      * @param gitUrl 代码仓库地址
