@@ -148,38 +148,6 @@ public class CodingAgentController {
     }
 
 
-    private void buildTree(TreeNode rootNode,File currentFile, List<String> ignoredFiles) throws Exception {
-        if (currentFile.isDirectory()) {
-            File[] children = currentFile.listFiles();
-            List<TreeNode> currentLevelChildNodes = new ArrayList<>();
-            if (children != null) {
-                for (File child : children) {
-                    //如果是文件，那么直接添加到【当前节点】的【子节点】列表中
-                    if(ignoredFiles.indexOf(child.getName())>=0)
-                    {//排除不需要展示的文件和目录
-                        continue;
-                    }
-                    TreeNode node = new TreeNode();
-                    node.setId(child.getAbsolutePath());
-                    node.setTitle(child.getName());
-                    node.setType(child.isDirectory() ? "folder" : "file");
-//                    node.setPath(child.getAbsolutePath());
-                    if (child.isDirectory()) {
-                        File currentFolder = child; //先假定目录的根是当前
-                        while (currentFolder.listFiles()!=null&&currentFolder.listFiles().length==1)
-                        {
-                            currentFolder=currentFolder.listFiles()[0];
-                        }
-                        //如果是目录，递归向下继续遍历
-                         buildTree(node,child,ignoredFiles);
-                    }
-                    currentLevelChildNodes.add(node);
-                }
-                rootNode.setChildren(currentLevelChildNodes);
-            }
-        }
-    }
-
     /**
      * 开启新会话
      * @param userId 用户标识
@@ -203,7 +171,7 @@ public class CodingAgentController {
     @SneakyThrows
     @PostMapping("/pullWorkspace")
     public ResponseEntity pullWorkspace(@RequestParam @NotNull(message = "代码仓库地址不能为空！") String gitUrl, @RequestParam String gitVersion) {
-        File rootDir = new File(workspaceDir);
+        File rootDir = new File(workspaceDir+"/workspace");
         if (!rootDir.exists() || !rootDir.isDirectory()) {
             throw new IllegalArgumentException("Invalid directory path");
         }
