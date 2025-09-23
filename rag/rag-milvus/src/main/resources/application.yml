@@ -154,7 +154,7 @@ mybatis-plus:
 #  password: ${MILVUS_PASSWORD:hdadmin} # default: milvus
 
 workspace:
-  root: D:\workspace\hdy-erp
+  root: D:\ai-test\
   chatHistory: 1000
 
 

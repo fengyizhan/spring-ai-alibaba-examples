@@ -101,6 +101,7 @@ public class CodingAgentController {
             ignoredFiles.add("README.md");
             ignoredFiles.add("build");
             ignoredFiles.add("target");
+            ignoredFiles.add("container");
             TreeNode rootNode=buildTree2(workspaceDir,ignoredFiles);
             return ResponseEntity.ok(rootNode.getChildren());
         } catch (Exception e) {
@@ -169,9 +170,9 @@ public class CodingAgentController {
     @SneakyThrows
     @PostMapping("/pullWorkspace")
     public ResponseEntity pullWorkspace(@RequestParam @NotNull(message = "代码仓库地址不能为空！") String gitUrl, @RequestParam String gitVersion) {
-        File rootDir = new File(workspaceDir+"/workspace");
+        File rootDir = new File(workspaceDir);
         if (!rootDir.exists() || !rootDir.isDirectory()) {
-            throw new IllegalArgumentException("Invalid directory path");
+            throw new IllegalArgumentException("工作空间目录不存在！");
         }
         //删除原来的文件
         FileUtils.deleteQuietly(rootDir);
