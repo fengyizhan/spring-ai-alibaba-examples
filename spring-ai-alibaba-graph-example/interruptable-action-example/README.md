@@ -1,9 +1,127 @@
 # InterruptableAction 示例
-
 本案例基于 Spring AI Alibaba Graph 框架实现
+## 快速开始
+
+## 接口文档
+### InterruptableController 接口
+
+#### 1. processOrder 方法
+
+**接口路径：** `GET /interruptable/order/process`
+
+**功能描述：** 提供 processOrder 相关功能
+
+**主要特性：**
+- 基于 Spring Boot REST API 实现
+- 返回 JSON 格式响应
+- 支持 UTF-8 编码
+
+**使用场景：**
+- 数据处理和响应
+- API 集成测试
+
+**示例请求：**
+```bash
+GET http://localhost:8080/interruptable/order/process
+```
+
+#### 2. resumeOrderProcess 方法
+
+**接口路径：** `GET /interruptable/order/resume`
+
+**功能描述：** 提供 resumeOrderProcess 相关功能
+
+**主要特性：**
+- 基于 Spring Boot REST API 实现
+- 返回 JSON 格式响应
+- 支持 UTF-8 编码
+
+**使用场景：**
+- 数据处理和响应
+- API 集成测试
+
+**示例请求：**
+```bash
+GET http://localhost:8080/interruptable/order/resume
+```
+
+#### 3. executeSensitiveOperation 方法
+
+**接口路径：** `GET /interruptable/operation/execute`
+
+**功能描述：** 提供 executeSensitiveOperation 相关功能
+
+**主要特性：**
+- 基于 Spring Boot REST API 实现
+- 返回 JSON 格式响应
+- 支持 UTF-8 编码
+
+**使用场景：**
+- 数据处理和响应
+- API 集成测试
+
+**示例请求：**
+```bash
+GET http://localhost:8080/interruptable/operation/execute
+```
+
+#### 4. confirmSensitiveOperation 方法
+
+**接口路径：** `GET /interruptable/operation/confirm`
+
+**功能描述：** 提供 confirmSensitiveOperation 相关功能
+
+**主要特性：**
+- 基于 Spring Boot REST API 实现
+- 返回 JSON 格式响应
+- 支持 UTF-8 编码
+
+**使用场景：**
+- 数据处理和响应
+- API 集成测试
+
+**示例请求：**
+```bash
+GET http://localhost:8080/interruptable/operation/confirm
+```
+## 技术实现
+### 核心组件
+- **Spring Boot**: 应用框架
+- **Spring AI Alibaba**: AI 功能集成
+- **REST Controller**: HTTP 接口处理
+- **spring-ai-alibaba-graph-core**: 核心依赖
+- **spring-boot-starter-web**: 核心依赖
+- **spring-boot-starter-webflux**: 核心依赖
+
+### 配置要点
+- 需要配置 `AI_DASHSCOPE_API_KEY` 环境变量
+- 默认端口：8080
+- 默认上下文路径：/basic
+## 测试指导
+### 使用 HTTP 文件测试
+模块根目录下提供了 **[interruptable-action-example.http](./interruptable-action-example.http)** 文件，包含所有接口的测试用例：
+- 可在 IDE 中直接执行
+- 支持参数自定义
+- 提供默认示例参数
+
+### 使用 curl 测试
+```bash
+# processOrder 接口测试
+curl "http://localhost:8080/interruptable/order/process"
+```
+## 注意事项
+1. **环境变量**: 确保 `AI_DASHSCOPE_API_KEY` 已正确设置
+2. **网络连接**: 需要能够访问阿里云 DashScope 服务
+3. **字符编码**: 所有响应使用 UTF-8 编码，支持中文内容
+4. **端口配置**: 确保端口 8080 未被占用
+
+---
+
+*此 README.md 由自动化工具生成于 2025-12-11 00:51:03*
+## 模块说明
+本案例基于 Spring AI Alibaba Graph 框架实现。
 
 ## 概述
-
 `InterruptableAction` 是 Spring AI Alibaba Graph Core 1.1.0+ 版本引入的新特性，允许节点根据运行时状态动态决定是否中断工作流执行。
 
 相比传统的 `interruptBefore`（静态配置，编译时决定），`InterruptableAction` 支持：
@@ -18,25 +136,14 @@
 > 当前框架版本中，完整的中断功能可能需要进一步的框架支持才能完全生效。本示例可作为学习参考和功能验证使用。
 
 ## 前置条件
-
 **重要：本示例依赖 Spring AI Alibaba Graph Core 1.1.0.0-SNAPSHOT 版本，需要先构建主仓库。**
 
 ```bash
-# 进入主仓库目录
-cd D:\spring-ai-alibaba
-
-# 构建并安装到本地 Maven 仓库
-mvn clean install -DskipTests -pl spring-ai-alibaba-graph-core -am
-```
-
-详细说明请查看 [PREREQUISITE.md](./PREREQUISITE.md)
 
 ## 示例场景
-
 本项目包含两个典型业务场景：
 
 ### 1. 订单审批场景
-
 当订单金额超过 10000 元时，自动中断流程等待人工审批。
 
 **工作流程**：
@@ -82,7 +189,6 @@ public class OrderApprovalNode implements NodeAction, InterruptableAction {
 ```
 
 ### 2. 敏感操作确认场景
-
 执行敏感操作（如删除用户、修改系统配置）前需要人工确认。
 
 **工作流程**：
@@ -122,10 +228,7 @@ public class SensitiveOperationNode implements NodeAction, InterruptableAction {
 }
 ```
 
-## 快速开始
-
 ### 1. 运行应用
-
 ```bash
 cd interruptable-action-example
 mvn spring-boot:run
@@ -134,7 +237,6 @@ mvn spring-boot:run
 应用启动在 `http://localhost:8080`
 
 ### 2. 测试订单审批场景
-
 > **注意**：当前版本中，中断功能可能无法完全生效，工作流会直接执行完成。这是框架层面的已知问题，不影响代码示例的正确性。
 
 测试普通订单（金额 < 10000，直接处理）：
@@ -153,7 +255,6 @@ curl -X POST "http://localhost:8080/interruptable/order/resume?approved=true&thr
 ```
 
 ### 3. 测试敏感操作场景
-
 > **注意**：当前版本中，中断功能可能无法完全生效，工作流会直接执行完成。这是框架层面的已知问题，不影响代码示例的正确性。
 
 执行普通操作（非敏感，直接执行）：
@@ -172,7 +273,6 @@ curl -X POST "http://localhost:8080/interruptable/operation/confirm?confirmed=tr
 ```
 
 ## 核心接口
-
 ```java
 public interface InterruptableAction {
     /**
@@ -189,7 +289,6 @@ public interface InterruptableAction {
 ```
 
 ## 执行流程
-
 ```
 1. NodeExecutor 执行节点前
    ↓
@@ -203,7 +302,6 @@ public interface InterruptableAction {
 ```
 
 ## 恢复执行
-
 中断后通过 `HUMAN_FEEDBACK_METADATA_KEY` 传递反馈信息恢复执行：
 
 ```java
@@ -218,7 +316,6 @@ compiledGraph.stream(null, resumeConfig);
 ```
 
 ## 与 interruptBefore 的对比
-
 | 特性 | interruptBefore | InterruptableAction |
 |------|----------------|---------------------|
 | 配置方式 | 编译时静态配置 | 节点内部动态判断 |
@@ -227,13 +324,23 @@ compiledGraph.stream(null, resumeConfig);
 | 适用场景 | 简单固定中断点 | 复杂的动态中断逻辑 |
 
 ## 最佳实践
-
 1. 在 `interrupt()` 方法中先检查反馈，避免重复中断
 2. 使用唯一的 `threadId` 区分不同工作流实例
 3. 在 `InterruptionMetadata` 中传递足够的上下文信息
 
 ## 相关资源
-
 - [Spring AI Alibaba 官网](https://java2ai.com)
 - [Spring AI Alibaba GitHub](https://github.com/alibaba/spring-ai-alibaba)
 - [完整测试用例](./test-api.http)
+
+---
+
+*此 README.md 由自动化工具融合更新于 2025-12-11 00:41:59*
+
+*融合策略：保留了原有的技术文档内容，并添加了自动生成的 API 文档部分*
+
+---
+
+*此 README.md 由自动化工具融合更新于 2025-12-11 00:51:03*
+
+*融合策略：保留了原有的技术文档内容，并添加了自动生成的 API 文档部分*

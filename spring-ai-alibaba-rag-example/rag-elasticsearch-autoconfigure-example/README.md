@@ -1,11 +1,109 @@
 # Spring AI Alibaba Autoconfigure RAG Elasticsearch Example ###
+This section will describe how to create example and use autoconfigure rag component.
+## 接口文档
+### RagAutoConfigureController 接口
 
-This section will describe how to create example and use autoconfigure rag component. 
+#### 1. retrievalHybrid 方法
+
+**接口路径：** `GET /rag/retrieval/hybrid`
+
+**功能描述：** 提供 retrievalHybrid 相关功能
+
+**主要特性：**
+- 基于 Spring Boot REST API 实现
+- 返回 JSON 格式响应
+- 支持 UTF-8 编码
+
+**使用场景：**
+- 数据处理和响应
+- API 集成测试
+
+**示例请求：**
+```bash
+GET http://localhost:8080/rag/retrieval/hybrid
+```
+
+#### 2. retrievalHyde 方法
+
+**接口路径：** `GET /rag/retrieval/hyde`
+
+**功能描述：** 提供 retrievalHyde 相关功能
+
+**主要特性：**
+- 基于 Spring Boot REST API 实现
+- 返回 JSON 格式响应
+- 支持 UTF-8 编码
+
+**使用场景：**
+- 数据处理和响应
+- API 集成测试
+
+**示例请求：**
+```bash
+GET http://localhost:8080/rag/retrieval/hyde
+```
+
+#### 3. transformHyde 方法
+
+**接口路径：** `GET /rag/transform/hyde`
+
+**功能描述：** 提供 transformHyde 相关功能
+
+**主要特性：**
+- 基于 Spring Boot REST API 实现
+- 返回 JSON 格式响应
+- 支持 UTF-8 编码
+
+**使用场景：**
+- 数据处理和响应
+- API 集成测试
+
+**示例请求：**
+```bash
+GET http://localhost:8080/rag/transform/hyde
+```
+## 技术实现
+### 核心组件
+- **Spring Boot**: 应用框架
+- **Spring AI Alibaba**: AI 功能集成
+- **REST Controller**: HTTP 接口处理
+- **spring-ai-alibaba-starter-dashscope**: 核心依赖
+- **spring-boot-starter-web**: 核心依赖
+- **spring-ai-alibaba-autoconfigure-rag-elasticsearch**: 核心依赖
+- **elasticsearch-java**: 核心依赖
+
+### 配置要点
+- 需要配置 `AI_DASHSCOPE_API_KEY` 环境变量
+- 默认端口：8080
+- 默认上下文路径：/basic
+## 测试指导
+### 使用 HTTP 文件测试
+模块根目录下提供了 **[rag-elasticsearch-autoconfigure-example.http](./rag-elasticsearch-autoconfigure-example.http)** 文件，包含所有接口的测试用例：
+- 可在 IDE 中直接执行
+- 支持参数自定义
+- 提供默认示例参数
+
+### 使用 curl 测试
+```bash
+# retrievalHybrid 接口测试
+curl "http://localhost:8080/rag/retrieval/hybrid"
+```
+## 注意事项
+1. **环境变量**: 确保 `AI_DASHSCOPE_API_KEY` 已正确设置
+2. **网络连接**: 需要能够访问阿里云 DashScope 服务
+3. **字符编码**: 所有响应使用 UTF-8 编码，支持中文内容
+4. **端口配置**: 确保端口 8080 未被占用
+
+---
+
+*此 README.md 由自动化工具生成于 2025-12-11 00:51:02*
+## 模块说明
+This section will describe how to create example and use autoconfigure rag component.。
 
 ## Quick Start
 
-### 1. add Dependency
 
+### 1. add Dependency
 Add the following dependencies in the `pom.xml` file of the Spring Boot project:
 
 ```xml
@@ -17,11 +115,9 @@ Add the following dependencies in the `pom.xml` file of the Spring Boot project:
 ```
 
 ### 2. rag configuration
-
 Add RAG related configurations in the `application.properties` or `application.yml` file:
 
 #### Basic Configuration
-
 ```yaml
 spring:
   # spring elasticsearch configuration
@@ -111,9 +207,20 @@ spring:
 ```
 
 ### 3. Use the RAG component
-
 In your Spring Boot application, directly use the automatically configured RAG component
 
 - HybridElasticsearchRetriever: Combining BM25 and KNN vector search, it supports Reciprocal Rank Fusion (RRF) sorting
 - HyDeRetriever: Enhances retrieval performance by generating hypothetical documents
 - HyDeTransformer: Generates hypothetical documents for input queries
+
+---
+
+*此 README.md 由自动化工具融合更新于 2025-12-11 00:41:32*
+
+*融合策略：保留了原有的技术文档内容，并添加了自动生成的 API 文档部分*
+
+---
+
+*此 README.md 由自动化工具融合更新于 2025-12-11 00:51:02*
+
+*融合策略：保留了原有的技术文档内容，并添加了自动生成的 API 文档部分*
