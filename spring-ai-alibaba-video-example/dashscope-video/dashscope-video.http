@@ -1,14 +1,14 @@
 # VideoController类的textToVideo方法
-GET http://localhost:8080/ai/video/text
+GET http://localhost:10081/ai/video/text
 
 ###
 # VideoController类的videoTmpl方法
-GET http://localhost:8080/ai/video/tmpl
+GET http://localhost:10081/ai/video/tmpl
 
 ###
 # VideoController类的firstFrame方法
-GET http://localhost:8080/ai/video/first
+GET http://localhost:10081/ai/video/first
 
 ###
 # VideoController类的firstAndLastFrame方法
-GET http://localhost:8080/ai/video/fl
+GET http://localhost:10081/ai/video/fl

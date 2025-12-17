@@ -1,10 +1,10 @@
 # AudioSpeechController类的streamTTS方法
-GET http://localhost:8080/ai/speech/stream
+GET http://localhost:10009/ai/speech/stream
 
 ###
 # AudioTranscriptionController类的callSTT方法
-GET http://localhost:8080/ai/transcription/call
+GET http://localhost:10009/ai/transcription/call
 
 ###
 # AudioTranscriptionController类的streamSTT方法
-GET http://localhost:8080/ai/transcription/stream
+GET http://localhost:10009/ai/transcription/stream

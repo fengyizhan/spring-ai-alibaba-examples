@@ -1,2 +1,2 @@
 # SummaryController类的summarize方法
-POST http://localhost:8080/text/plain
+POST http://localhost:10091/text/plain

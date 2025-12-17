@@ -1,2 +1,2 @@
 # BigToolController类的search方法
-GET http://localhost:8080bigtool/search
+GET http://localhost:18080/bigtool/search
