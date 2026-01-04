@@ -10,20 +10,36 @@ spring:
         name: mcp-nacos-gateway-example
         version: 1.0.0
         enabled: true
-        protocol: streamable
-        streamable-http:
-          mcp-endpoint: /mcp
+        protocol: sse
+        type: async
+        instructions: "Nacos MCP Gateway - 聚合多个 MCP Server 的工具网关"
+        sse-message-endpoint: /mcp/messages
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
     dashscope:
       api-key: ${DASHSCOPE_API_KEY}
 
     alibaba:
+      # MCP Gateway 配置
       mcp:
         gateway:
           enabled: true
+          registry: nacos
+          # 配置要发现和聚合的 MCP Server 服务名称
           nacos:
-            service-names: mcp-nacos-restful
+            serviceNames:
+              - nacos-mcp-server-sse         # SSE 协议的 MCP Server
+              - nacos-mcp-server-streamable  # Streamable 协议的 MCP Server
+        # Nacos 注册中心配置
         nacos:
-          namespace: 4ad3108b-4d44-43d0-9634-3c1ac4850c8c
-          server-addr: 127.0.0.1:8848
+          server-addr: localhost:8848
+          namespace: public
           username: nacos
           password: nacos
+
+logging:
+  level:
+    com.alibaba.cloud.ai.mcp: DEBUG
