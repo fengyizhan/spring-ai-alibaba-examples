@@ -1,271 +1,128 @@
-# Skills Agent Web 应用
+# Skills Agent Example
 
-基于 Spring AI Alibaba 的 Web 版 AI Agent，支持浏览器访问和 REST API 调用。
+## 项目简介
 
-## 特点
+本项目演示了如何使用 Spring AI Alibaba 的 Agent Framework 构建一个支持动态加载skill的ReActAgent。通过 Skills 机制，Agent 可以根据用户需求自动识别并调用相应的技能来完成复杂任务。
 
-- ✅ Web 界面，支持浏览器访问
-- ✅ REST API，支持程序调用
-- ✅ 会话管理，支持多用户
-- ✅ 完美支持中文
-- ✅ 集成 Skills 系统
-- ✅ 实时对话
 
 ## 快速开始
 
-### 1. 设置 API Key（可选）
+### 配置
+
+1. 设置环境变量或在 `application.yml` 中配置 DashScope API Key：
 
 ```bash
-set DASHSCOPE_API_KEY=your_api_key_here
+export AI_DASHSCOPE_API_KEY=your_api_key_here
 ```
 
-如果不设置，会使用 application.yml 中的默认配置。
-
-### 2. 启动应用
-
-```bash
-mvn spring-boot:run
-```
-
-或者先构建再运行：
-
-```bash
-mvn clean package -DskipTests
-java -jar target/skills-agent-example-0.0.1-SNAPSHOT.jar
-```
-
-### 3. 访问应用
-
-打开浏览器访问：
-
-```
-http://localhost:8080
-```
-
-## API 文档
-
-### 1. 发送消息
-
-**POST** `/api/chat/message`
-
-请求体：
-```json
-{
-  "message": "你好，介绍一下你自己",
-  "sessionId": "user123"
-}
-```
-
-响应：
-```json
-{
-  "success": true,
-  "reply": "你好！我是一个 AI 助手...",
-  "sessionId": "user123"
-}
-```
-
-### 2. 重置会话
-
-**POST** `/api/chat/reset`
-
-请求体：
-```json
-{
-  "sessionId": "user123"
-}
-```
-
-响应：
-```json
-{
-  "success": true,
-  "message": "会话已重置",
-  "sessionId": "user123"
-}
-```
-
-### 3. 查看会话列表
-
-**GET** `/api/chat/sessions`
-
-响应：
-```json
-{
-  "success": true,
-  "sessionCount": 2,
-  "sessions": ["user123", "user456"]
-}
-```
-
-### 4. 健康检查
-
-**GET** `/api/chat/health`
-
-响应：
-```json
-{
-  "status": "ok",
-  "service": "Skills Agent API"
-}
-```
-
-## 使用示例
-
-### cURL 调用
-
-```bash
-# 发送消息
-curl -X POST http://localhost:8080/api/chat/message \
-  -H "Content-Type: application/json" \
-  -d "{\"message\":\"你好\",\"sessionId\":\"test\"}"
-
-# 重置会话
-curl -X POST http://localhost:8080/api/chat/reset \
-  -H "Content-Type: application/json" \
-  -d "{\"sessionId\":\"test\"}"
-```
-
-### Python 调用
-
-```python
-import requests
-
-# 发送消息
-response = requests.post('http://localhost:8080/api/chat/message', json={
-    'message': '帮我搜索关于机器学习的论文',
-    'sessionId': 'python-client'
-})
-print(response.json()['reply'])
-
-# 重置会话
-requests.post('http://localhost:8080/api/chat/reset', json={
-    'sessionId': 'python-client'
-})
-```
-
-### JavaScript 调用
-
-```javascript
-// 发送消息
-const response = await fetch('http://localhost:8080/api/chat/message', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        message: '你好',
-        sessionId: 'js-client'
-    })
-});
-const data = await response.json();
-console.log(data.reply);
-```
-
-## 配置
-
-### 修改端口
-
-编辑 `src/main/resources/application.yml`：
-
-```yaml
-server:
-  port: 9090  # 改成你想要的端口
-```
-
-### 修改模型
+2. 或直接修改 `src/main/resources/application.yml`：
 
 ```yaml
 spring:
   ai:
     dashscope:
-      chat:
-        options:
-          model: qwen-max  # 可选: qwen-plus, qwen-turbo, qwen-max
+      api-key: your_api_key_here
 ```
 
-### 跨域配置
-
-如果需要从其他域名访问，Controller 已经配置了 `@CrossOrigin(origins = "*")`。
-
-生产环境建议修改为具体域名：
-
-```java
-@CrossOrigin(origins = "https://yourdomain.com")
-```
-
-## Skills 功能
-
-应用已集成以下 Skills：
-
-1. **arxiv-search** - 搜索 arXiv 论文库
-2. **skill-creator** - 创建新的 skill
-3. **web-research** - 进行网络研究
-
-Agent 会根据用户问题自动调用相应的 Skill。
-
-## 部署
-
-### Docker 部署
-
-创建 `Dockerfile`：
-
-```dockerfile
-FROM openjdk:17-slim
-COPY target/skills-agent-example-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app.jar"]
-```
-
-构建并运行：
+### 运行
 
 ```bash
-docker build -t skills-agent .
-docker run -p 8080:8080 -e DASHSCOPE_API_KEY=your_key skills-agent
+# 编译项目
+mvn clean package
+
+# 运行应用
+mvn spring-boot:run
 ```
 
-### 云服务器部署
+应用将在 `http://localhost:8080` 启动。
+
+### 测试
+
+使用 POST 请求与 Agent 对话：
 
 ```bash
-# 构建
-mvn clean package -DskipTests
-
-# 上传 jar 到服务器
-scp target/skills-agent-example-0.0.1-SNAPSHOT.jar user@server:/app/
-
-# 在服务器上运行
-nohup java -jar /app/skills-agent-example-0.0.1-SNAPSHOT.jar > /app/logs/app.log 2>&1 &
+curl -X POST "http://localhost:8080/chat?message=搜索关于深度学习的最新论文"
 ```
 
-## 故障排查
+## 核心组件说明
 
-### 端口被占用
+### SkillsAgent
 
-修改 `application.yml` 中的端口号，或者使用命令行参数：
+`SkillsAgent` 是 Agent 的核心构建器，负责：
 
-```bash
-java -jar target/skills-agent-example-0.0.1-SNAPSHOT.jar --server.port=9090
+1. **技能加载**：通过 `SkillsInterceptor` 自动扫描 `skills` 目录
+2. **工具注册**：注册文件操作和 Shell 执行工具
+3. **Agent 构建**：创建配置完整的 ReactAgent 实例
+
+
+## 内置 Skills
+
+### 1. arxiv-search
+
+搜索 arXiv 预印本论文库。
+
+**功能**：
+- 搜索物理、数学、计算机科学等领域的学术论文
+- 支持自定义返回结果数量
+- 按相关性排序
+
+**使用示例**：
+```
+"帮我搜索关于蛋白质折叠预测的最新论文"
+"查找深度学习在药物发现中的应用研究"
 ```
 
-### API 调用失败
+### 2. web-search
 
-1. 检查 API Key 是否正确
-2. 检查网络连接
-3. 查看日志：`tail -f logs/spring.log`
+结构化的 Web 研究流程。
 
-### 会话过多导致内存问题
+**功能**：
+- 复杂主题的多源信息收集
+- 系统化的研究计划和执行
+- 综合分析和报告生成
 
-可以添加会话清理机制，或者使用 Redis 存储会话。
+**使用示例**：
+```
+"研究一下当前主流的云服务提供商对比"
+"调查最新的前端框架发展趋势"
+```
 
-## 性能优化
+### 3. skill-creator
 
-1. **启用缓存** - 缓存常见问题的回答
-2. **异步处理** - 使用 `@Async` 处理长时间请求
-3. **连接池** - 配置 HTTP 客户端连接池
-4. **限流** - 添加 API 限流保护
+创建新技能的指南。
 
-## 安全建议
+**功能**：
+- 技能设计最佳实践
+- 技能结构和组织规范
+- 渐进式信息披露模式
 
-1. 添加认证机制（JWT、OAuth2）
-2. 限制请求频率
-3. 验证输入内容
-4. 使用 HTTPS
-5. 不要在前端暴露 API Key
+### 创建自定义 Skill
+
+1. 在 `skills` 目录下创建新文件夹
+2. 创建 `SKILL.md` 文件，包含 YAML frontmatter 和使用说明
+3. （可选）添加脚本、参考文档或资产文件
+4. 重启应用，技能将自动加载
+
+**SKILL.md 模板**：
+
+```markdown
+---
+name: my-skill
+description: 技能描述，包括功能和使用场景
+---
+
+# My Skill
+
+## 功能说明
+
+描述技能的主要功能...
+
+## 使用方法
+
+提供使用示例和说明...
+
+## 注意事项
+
+列出重要的注意事项...
+```
+也可以利用这个 agent 中内置的 skill-creator 去用自然语言创建 skill
