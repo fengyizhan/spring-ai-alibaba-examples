@@ -15,6 +15,7 @@
  */
 package com.alibaba.cloud.ai.mcp.server.service;
 
+import com.alibaba.cloud.ai.mcp.server.util.UserInfoHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.annotation.Tool;
@@ -37,7 +38,13 @@ public class TimeService {
 
     @Tool(description = "Get the time of a specified city.")
     public String  getCityTimeMethod(@ToolParam(description = "Time zone id, such as Asia/Shanghai") String timeZoneId) {
-        logger.info("The current time zone is {}", timeZoneId);
+
+        //get userInfo from UserInfoHolder
+        String userInfo = UserInfoHolder.getUserInfo();
+        // Tool business can retrieve user data based on login information
+        // for example, the GitHub MCP server can use this user info to fetch the repository list, etc.
+        logger.info("The current time zone is {} and the userInfo is {}", timeZoneId,userInfo);
+
         return String.format("The current time zone is %s and the current time is " + "%s", timeZoneId,
                 getTimeByZoneId(timeZoneId));
     }
