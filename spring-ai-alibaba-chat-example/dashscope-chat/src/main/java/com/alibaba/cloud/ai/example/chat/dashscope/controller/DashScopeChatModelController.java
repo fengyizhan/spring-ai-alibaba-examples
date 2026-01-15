@@ -176,8 +176,42 @@ public class DashScopeChatModelController {
 				.build();
 
 		return dashScopeChatModel.stream(new Prompt(prompt, options)).map(resp -> resp.getResult().getOutput().getText());
-
 	}
+
+	// search_info stream demo，将以下代码放在 main 中执行
+	// public static void main(String[] args) {
+	//
+	//    DashScopeChatModel.builder()
+	//            .dashScopeApi(DashScopeApi.builder()
+	//                    .apiKey("sk-xxx")
+	//                    .build()
+	//            ).defaultOptions(
+	//                    DashScopeChatOptions.builder()
+	//                            .model("qwen-plus")
+	//                            .enableSearch(true)
+	//                            .searchOptions(DashScopeApiSpec.SearchOptions.builder()
+	//                                    .enableSource(true)
+	//                                    .forcedSearch(true)
+	//                                    .searchStrategy("turbo")
+	//                                    .build()
+	//                            ).build()
+	//            ).build().stream(new Prompt("委内瑞拉总统新闻")).log()
+	//            .subscribe(
+	//            res -> {
+	//                System.out.println(res.getResult().getOutput().getText());
+	//                System.out.println("search_info -> " + res.getResult().getOutput().getMetadata().get("search_info"));
+	//            },
+	//            err -> System.out.println("err ->" + err),
+	//            () -> System.out.println("done")
+	//    );
+	//
+	//    try {
+	//        Thread.sleep(10000);
+	//    } catch (InterruptedException e) {
+	//        Thread.currentThread().interrupt();
+	//    }
+	//
+	//}
 
 	@GetMapping("/dashscope/web-search/2")
 	public Map<String, Object> dashScopeWebSearch2(HttpServletResponse response) {
