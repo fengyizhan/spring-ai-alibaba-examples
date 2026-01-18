@@ -17,6 +17,11 @@ name: SAA Playground Docker Build and Publish
 on:
   push:
     branches: ["main"]
+    paths:
+      - 'spring-ai-alibaba-playground/frontend/**'
+      - 'spring-ai-alibaba-playground/src/**'
+      - 'spring-ai-alibaba-playground/deploy/**'
+      - 'spring-ai-alibaba-playground/pom.xml'
   pull_request:
     paths:
       - 'spring-ai-alibaba-playground/frontend/**'
