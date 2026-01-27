@@ -34,7 +34,7 @@ public class RedisChatMemory implements ChatMemory {
 
     @Override
     public List<Message> get(String conversationId, int lastN) {
-        return chatHistoryService.getLastMessages(conversationId, lastN);
+        return List.of();
     }
 
     @Override

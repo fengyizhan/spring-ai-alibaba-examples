@@ -44,7 +44,7 @@
         <dependency>
             <groupId>com.alibaba.cloud.ai</groupId>
             <artifactId>spring-ai-alibaba-starter</artifactId>
-            <version>${spring-ai-alibaba.version}</version>
+            <version>1.0.0-M6.1</version>
             <exclusions>
                 <exclusion>
                     <artifactId>httpclient</artifactId>
@@ -99,15 +99,39 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-milvus-store-spring-boot-starter</artifactId>
+            <artifactId>spring-ai-milvus-store</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>group.springframework.ai</groupId>
-            <artifactId>spring-ai-dashscope</artifactId>
-            <version>1.1.0</version>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-autoconfigure-vector-store-milvus</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-advisors-vector-store</artifactId>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-agent-framework</artifactId>
+            <version>${spring-ai-alibaba.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-graph-core</artifactId>
+            <version>${spring-ai-alibaba.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
+            <version>${spring-ai-alibaba.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>spring-context-support</artifactId>

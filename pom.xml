@@ -37,14 +37,20 @@
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 
+
+		<spring-ai-alibaba-extensions.version>1.1.2.0</spring-ai-alibaba-extensions.version>
+
+
+
+
 		<!-- Spring AI -->
-		<spring-ai.version>1.0.0-M6</spring-ai.version>
+		<spring-ai.version>1.1.0</spring-ai.version>
 
 		<!-- Spring AI Alibaba -->
-		<spring-ai-alibaba.version>1.0.0-M6.1</spring-ai-alibaba.version>
+		<spring-ai-alibaba.version>1.1.0.0</spring-ai-alibaba.version>
 
 		<!-- Spring Boot -->
-		<spring-boot.version>3.4.0</spring-boot.version>
+		<spring-boot.version>3.5.7</spring-boot.version>
 
 		<!-- maven plugin -->
 		<maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
@@ -54,11 +60,22 @@
 
 	<modules>
 		<module>rag</module>
-		<module>mcp</module>
 	</modules>
 
 	<dependencyManagement>
+
 		<dependencies>
+			<!-- 强制指定 protobuf 稳定版本，覆盖传递依赖的 3.22.1 -->
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java</artifactId>
+				<version>3.25.3</version> <!-- 稳定版，无 POM 语法错误 -->
+			</dependency>
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java-util</artifactId>
+				<version>3.25.3</version>
+			</dependency>
 			<dependency>
 				<groupId>com.baomidou</groupId>
 				<artifactId>mybatis-plus-bom</artifactId>
@@ -90,8 +107,10 @@
 			</dependency>
 			<dependency>
 				<groupId>com.alibaba.cloud.ai</groupId>
-				<artifactId>spring-ai-alibaba-starter</artifactId>
-				<version>${spring-ai-alibaba.version}</version>
+				<artifactId>spring-ai-alibaba-extensions-bom</artifactId>
+				<version>${spring-ai-alibaba-extensions.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -160,10 +179,25 @@
 	</build>
 
 	<repositories>
+		<!-- 阿里云spring ai专属仓库（核心！必须加，spring-ai-alibaba-starter主依赖在这里） -->
+		<repository>
+			<id>spring-ai-alibaba-milestone</id>
+			<name>Spring AI Alibaba Milestone Repository</name>
+			<url>https://maven.aliyun.com/repository/spring-ai-alibaba</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
 		<repository>
 			<id>spring-milestones</id>
 			<name>Spring Milestones</name>
 			<url>https://repo.spring.io/milestone</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -175,6 +209,17 @@
 			<releases>
 				<enabled>false</enabled>
 			</releases>
+		</repository>
+		<repository>
+			<id>sonatype</id>
+			<name>OSS Sonatype</name>
+			<url>https://oss.sonatype.org/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 		<repository>
 			<id>aliyunmaven</id>

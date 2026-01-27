@@ -58,7 +58,9 @@ public class ChatController {
                     .user(input)
                     .advisors(spec -> spec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
                             // 继续在 Lambda 表达式中调用 .param 方法，设置聊天记忆的检索大小为 1000
-                            .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 1000))
+                            .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 1000)
+                            .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,userId)
+                    )
                     .tools(new TimeTool(),new TickTool())
                     .call()
                     .content();
@@ -71,7 +73,9 @@ public class ChatController {
                     .user(input)
                     .advisors(spec -> spec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, userId)
                             // 继续在 Lambda 表达式中调用 .param 方法，设置聊天记忆的检索大小为 1000
-                            .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 1000))
+                            .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 1000)
+                            .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,userId)
+                    )
                     .call()
                     .content();
             log.info("common text --> [{}]", text);
