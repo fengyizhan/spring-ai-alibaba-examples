@@ -16,8 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-mcp-server-webflux-spring-boot-starter</artifactId>
-            <version>${spring-ai.version}</version>
+            <artifactId>spring-ai-starter-mcp-server-webflux</artifactId>
         </dependency>
 
         <dependency>

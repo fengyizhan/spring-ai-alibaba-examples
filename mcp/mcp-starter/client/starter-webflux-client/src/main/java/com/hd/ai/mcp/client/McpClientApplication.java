@@ -1,4 +1,4 @@
-/*
+package com.hd.ai.mcp.client;/*
  * Copyright 2025-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,42 +15,50 @@
  *
  * @author brianxiadong
  */
-package com.hd.ai.mcp.client;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-@SpringBootApplication(exclude = {
-        org.springframework.ai.autoconfigure.mcp.client.SseHttpClientTransportAutoConfiguration.class
-})
+import java.util.Scanner;
+
+@SpringBootApplication
 public class McpClientApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(McpClientApplication.class, args);
     }
 
-    // 直接硬编码中文问题，避免配置文件编码问题
-    // @Value("${ai.user.input}")
-    // private String userInput;
-    private String userInput = "郑州的的天气如何？";
-    @Autowired
-    private ChatModel chatModel;
 
     @Bean
-    public CommandLineRunner predefinedQuestions(ChatClient.Builder builder,ToolCallbackProvider tools,
-            ConfigurableApplicationContext context) {
-//        userInput="郑州的经纬度是什么？";
+    public CommandLineRunner predefinedQuestions(ChatClient.Builder chatClientBuilder, ToolCallbackProvider tools,
+                                                 ConfigurableApplicationContext context) {
+
+        ToolCallback[] toolCallbacks = tools.getToolCallbacks();
+        System.out.println("Available tools:");
+        for (ToolCallback toolCallback : toolCallbacks) {
+            System.out.println(">>> " + toolCallback.getToolDefinition().name());
+        }
+
         return args -> {
-            var chatClient = ChatClient.builder(chatModel).defaultTools(tools.getToolCallbacks()).build();
-            System.out.println("\n>>> QUESTION: " + userInput);
-            System.out.println("\n>>> ASSISTANT: " + chatClient.prompt().user(userInput).call().content());
+            var chatClient = chatClientBuilder.defaultTools(tools.getToolCallbacks())
+                    .build();
+
+            Scanner scanner = new Scanner(System.in);
+            while (true) {
+                System.out.print("\n>>> QUESTION: ");
+                String userInput = scanner.nextLine();
+                if (userInput.equalsIgnoreCase("exit")) {
+                    break;
+                }
+                System.out.println("\n>>> ASSISTANT: " + chatClient.prompt(userInput).call().content());
+            }
+            scanner.close();
             context.close();
         };
     }

@@ -42,7 +42,9 @@
 
 
 
-
+		<!-- Spring AI alibaba BASIC and MCP-->
+		<spring-ai-alibaba-old.version>1.0.0-M6.1</spring-ai-alibaba-old.version>
+		<spring-ai-alibaba-mcp.version>1.0.0-M6</spring-ai-alibaba-mcp.version>
 		<!-- Spring AI -->
 		<spring-ai.version>1.1.0</spring-ai.version>
 
@@ -60,6 +62,7 @@
 
 	<modules>
 		<module>rag</module>
+		<module>mcp</module>
 	</modules>
 
 	<dependencyManagement>
