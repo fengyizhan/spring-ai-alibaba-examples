@@ -31,7 +31,7 @@ public class SampleClient {
 
     private final McpClientTransport transport;
 
-    public SampleClient(ClientMcpTransport transport) {
+    public SampleClient(McpClientTransport transport) {
         this.transport = transport;
     }
 
